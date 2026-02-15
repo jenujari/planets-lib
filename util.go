@@ -6,7 +6,7 @@ import (
 )
 
 type DMS struct {
-	isNegative bool
+	IsNegative bool
 	D          int
 	M          int
 	S          float32
@@ -19,9 +19,9 @@ func NewDMS(degree float64) DMS {
 }
 
 func (d *DMS) ParseFromDegree(degree float64) {
-	d.isNegative = false
+	d.IsNegative = false
 	if degree < 0 {
-		d.isNegative = true
+		d.IsNegative = true
 	}
 	degree = math.Abs(degree)
 	d.D = int(degree)
@@ -31,7 +31,7 @@ func (d *DMS) ParseFromDegree(degree float64) {
 
 func (dms DMS) ToDegree() float64 {
 	degree := float64(dms.D) + float64(dms.M)/60 + float64(dms.S)/3600
-	if dms.isNegative {
+	if dms.IsNegative {
 		return -degree
 	}
 	return degree
@@ -41,7 +41,7 @@ func (d DMS) String() string {
 	Degree := int(math.Abs(float64(d.D)))
 	minutes := int(math.Abs(float64(d.M)))
 	second := float32(math.Abs(float64(d.S)))
-	if d.isNegative {
+	if d.IsNegative {
 		return fmt.Sprintf("-%d°%d'%.2f\"", Degree, minutes, second)
 	} else {
 		return fmt.Sprintf("%d°%d'%.2f\"", Degree, minutes, second)
