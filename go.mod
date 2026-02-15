@@ -1,4 +1,4 @@
-module jenujari/planets-lib
+module github.com/jenujari/planets-lib
 
 go 1.25.6
 
