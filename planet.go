@@ -43,12 +43,14 @@ type PlanetCord struct {
 	SpeedLongDMS DMS
 	Sign         string
 	Nakshatra    NakshatraPada
+	IsRetro      bool
 }
 
-func (p *PlanetCord) CalculateAllBala() {
+func (p *PlanetCord) CalculateDerivedValues() {
 	p.LongitudeDMS = NewDMS(p.Longitude)
 	p.LatitudeDMS = NewDMS(p.Latitude)
 	p.SpeedLongDMS = NewDMS(p.SpeedLong)
 	p.Sign = GetSignFrmDegree(p.Longitude)
 	p.Nakshatra = GetNakshatraPadaFromDegree(p.Longitude)
+	p.IsRetro = p.SpeedLong < 0
 }
