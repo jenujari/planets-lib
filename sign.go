@@ -1,4 +1,4 @@
-package baseLib
+package baselib
 
 import "math"
 

@@ -1,4 +1,4 @@
-package baseLib
+package baselib
 
 const (
 	SUN     = "Sun"
