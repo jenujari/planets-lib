@@ -64,11 +64,8 @@ func TestCalcTithy(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			moon := PlanetCord{Longitude: tt.moonLong}
-			sun := PlanetCord{Longitude: tt.sunLong}
-			result := CalcTithy(moon, sun)
+			result := CalcTithy(tt.moonLong, tt.sunLong)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
