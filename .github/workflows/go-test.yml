@@ -5,8 +5,9 @@ name: "Go Test"
 # enable branch protection in the repository settings and add
 # this workflow's check (named "Go Test") as a required status check for the `main` branch.
 on:
-  push: {}
-  pull_request: {}
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -43,16 +44,13 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Install golangci-lint
-        # Install golangci-lint binary to /usr/local/bin for the runner
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.59.0
-
-      - name: Run golangci-lint
-        # Run the linter and fail the job if issues are found.
-        run: |
-          # Adjust flags as needed; disable or enable linters via .golangci.yml in repo
-          golangci-lint run ./...
+      - name: Run golangci-lint (via action)
+        uses: golangci/golangci-lint-action@v4
+        with:
+          # golangci-lint version to use on the runner
+          version: v2.11.4
+          # Run with a timeout; golangci-lint-action will install the binary for you
+          args: run --timeout 5m ./...
 
       - name: Run tests
         env:
