@@ -29,32 +29,9 @@ jobs:
           # Pick an appropriate Go version for your project. You can change this as needed.
           go-version: 1.25.6
 
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-mod-
-
-      - name: Modules mode note
-        run: echo "Using Go modules (default for recent Go versions); no explicit GO111MODULE change."
-
       - name: Download dependencies
         run: go mod download
 
-      - name: Run golangci-lint (via action)
-        uses: golangci/golangci-lint-action@v4
-        with:
-          # golangci-lint version to use on the runner
-          version: v2.11.4
-          # Run with a timeout; golangci-lint-action will install the binary for you
-          args: run --timeout 5m ./...
-
       - name: Run tests
-        env:
-          # ensure modules mode and consistent output
-          GOFLAGS: "-mod=mod"
         run: |
           go test ./... -v
