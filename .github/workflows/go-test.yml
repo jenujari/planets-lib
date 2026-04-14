@@ -5,8 +5,9 @@ name: "Go Test"
 # enable branch protection in the repository settings and add
 # this workflow's check (named "Go Test") as a required status check for the `main` branch.
 on:
-  push: {}
-  pull_request: {}
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -28,24 +29,9 @@ jobs:
           # Pick an appropriate Go version for your project. You can change this as needed.
           go-version: 1.25.6
 
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-mod-
-
-      - name: Modules mode note
-        run: echo "Using Go modules (default for recent Go versions); no explicit GO111MODULE change."
-
       - name: Download dependencies
         run: go mod download
 
       - name: Run tests
-        env:
-          # ensure modules mode and consistent output
-          GOFLAGS: "-mod=mod"
         run: |
           go test ./... -v

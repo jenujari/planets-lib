@@ -1,5 +1,7 @@
 # planets-lib
 
+[![Go Test](https://github.com/jenujari/planets-lib/actions/workflows/go-test.yml/badge.svg?branch=main)](https://github.com/jenujari/planets-lib/actions/workflows/go-test.yml)
+
 A small, focused Go library for basic astronomical/astrological utilities:
 - Calculation of tithy (lunar day)
 - Mapping longitudes to zodiac signs
@@ -90,16 +92,3 @@ This ensures pull requests (and pushes) run the test suite; merges to `main` can
 
 - The module declares `go 1.25.6` in `go.mod`; use a compatible Go toolchain (>= 1.18 works for modules, but module Go version is 1.25.6).
 - Dependencies: `github.com/stretchr/testify` is used for assertions in tests.
-
-## Notes / Future work
-
-- `GetNakshatraPadaFromDegree` currently uses explicit ranges. It could be refactored into a data-driven table to improve maintainability.
-- Some functions return sentinel values on invalid inputs (e.g., `0` or `""`). If you prefer an error-returning API, that can be introduced in a breaking change with tests updated accordingly.
-- Consider adding linters (`golangci-lint`) to the CI workflow for stricter checks.
-
----
-
-If you'd like, I can:
-- Add a short example program under `examples/` showing library usage.
-- Convert some large if/else mappings (nakshatra) into a data table with unit tests.
-- Add a status badge for the GitHub Actions workflow at the top of this README.

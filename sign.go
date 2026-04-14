@@ -74,33 +74,30 @@ func GetSignFrmDegree(d float64) string {
 // RAHU and KETU are not considered in this function
 // RAHU is lord of Aries and Virgo
 // KETU is lord of Libra
+//
+// Refactor: use a small map for lookups to make the mapping data-driven
+// and easier to maintain.
+var signLordMap = map[string]string{
+	SIGN_ARIES:       MARS,
+	SIGN_TAURUS:      VENUS,
+	SIGN_GEMINI:      MERCURY,
+	SIGN_CANCER:      MOON,
+	SIGN_LEO:         SUN,
+	SIGN_VIRGO:       MERCURY,
+	SIGN_LIBRA:       VENUS,
+	SIGN_SCORPIO:     MARS,
+	SIGN_SAGITTARIUS: JUPITER,
+	SIGN_CAPRICORN:   SATURN,
+	SIGN_AQUARIUS:    SATURN,
+	SIGN_PISCES:      JUPITER,
+}
+
 func GetSignLord(sign string) string {
-	switch sign {
-	case SIGN_ARIES:
-		return MARS
-	case SIGN_TAURUS:
-		return VENUS
-	case SIGN_GEMINI:
-		return MERCURY
-	case SIGN_CANCER:
-		return MOON
-	case SIGN_LEO:
-		return SUN
-	case SIGN_VIRGO:
-		return MERCURY
-	case SIGN_LIBRA:
-		return VENUS
-	case SIGN_SCORPIO:
-		return MARS
-	case SIGN_SAGITTARIUS:
-		return JUPITER
-	case SIGN_CAPRICORN:
-		return SATURN
-	case SIGN_AQUARIUS:
-		return SATURN
-	case SIGN_PISCES:
-		return JUPITER
-	default:
+	if sign == "" {
 		return ""
 	}
+	if lord, ok := signLordMap[sign]; ok {
+		return lord
+	}
+	return ""
 }
