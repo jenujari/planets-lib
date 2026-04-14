@@ -1,0 +1,105 @@
+# planets-lib
+
+A small, focused Go library for basic astronomical/astrological utilities:
+- Calculation of tithy (lunar day)
+- Mapping longitudes to zodiac signs
+- Mapping longitudes to nakshatra (lunar mansion) and pada
+- Lightweight planet coordinate container with derived computations
+- DMS (degrees/minutes/seconds) formatting helpers
+
+This repository is intentionally small and flat — production code lives at the module root (e.g. `tithy.go`, `sign.go`, `nakshatra.go`, `planet.go`, `util.go`). Tests are colocated with the code in `*_test.go` files.
+
+## Highlights / Design decisions
+
+- Angle normalization is centralized via `normalizeAngle` to consistently map arbitrary angles into `[0, 360)`.
+- Functions are defensive about invalid floats: NaN and ±Inf inputs are handled predictably instead of panicking.
+  - `CalcTithy` returns `0` for invalid inputs.
+  - `GetSignFrmDegree` returns an empty string for invalid inputs.
+  - `GetNakshatraPadaFromDegree` returns a zero-value `NakshatraPada` for invalid inputs.
+- `PlanetCord.CalculateDerivedValues()` computes derived fields (DMS, sign, nakshatra, retrograde) defensively and uses normalized longitude for lookups without mutating the stored longitude.
+- Unit tests cover normalization, boundary values, and invalid inputs.
+
+## Quick usage
+
+- Compute tithy given moon & sun longitudes (degrees):
+  - Use `CalcTithy(moonLong, sunLong)` — returns an `int` in `1..30` (or `0` when input is invalid).
+
+- Get zodiac sign from a longitude:
+  - Use `GetSignFrmDegree(longitude)` — returns sign name like `"Aries"` or `""` if input invalid.
+
+- Get nakshatra and pada from a longitude:
+  - Use `GetNakshatraPadaFromDegree(longitude)` — returns `NakshatraPada{Name string, Pada int}` (zero-value if invalid).
+
+- Planet coordinates helper:
+  - Use the `PlanetCord` struct; call `CalculateDerivedValues()` to populate derived fields like `Sign`, `Nakshatra`, DMS fields, and `IsRetro`.
+
+Example (conceptual):
+- To run existing tests locally: `go test ./...`
+- To format code: `go fmt ./...`
+
+## Running tests
+
+- Run the full test suite:
+  - `go test ./... -v`
+
+- Run a focused test (example):
+  - `go test -run TestCalcTithy ./...`
+
+- Check coverage:
+  - `go test ./... -cover`
+
+The test suite includes cases for:
+- Angle normalization (values outside 0..360, negatives, large positives)
+- Edge boundaries near sign/nakshatra/pada/tithy transitions
+- Invalid float inputs (NaN/Inf)
+- PlanetCord derived value behavior
+
+## Continuous Integration
+
+A GitHub Actions workflow is included at `.github/workflows/go-test.yml`. It runs `go test ./...` for `push` and `pull_request` events.
+
+To require CI to pass before merging to `main`:
+1. On GitHub, go to Repository → Settings → Branches → Branch protection rules.
+2. Add/Edit rule for `main`.
+3. Enable "Require status checks to pass before merging".
+4. Select the workflow job/check named `Go Test` (it will appear after a run).
+5. Save the rule.
+
+This ensures pull requests (and pushes) run the test suite; merges to `main` can be blocked until tests pass.
+
+## Contributing
+
+- Follow the project guidelines in `AGENTS.md`:
+  - Use idiomatic Go formatting (`go fmt`).
+  - Prefer table-driven tests for algorithmic logic.
+  - Use short, imperative commit messages.
+  - Run `go test ./...` before opening a PR.
+
+- When updating calculations, add tests for numeric edge cases and normalization behavior.
+
+## Files of interest
+
+- `tithy.go` — tithy calculation and `normalizeAngle`.
+- `sign.go` — sign names and `GetSignFrmDegree`.
+- `nakshatra.go` — nakshatra/pada mapping and vowel-based mapping helper.
+- `planet.go` — `PlanetCord` struct and `CalculateDerivedValues`.
+- `util.go` — `DMS` utilities and formatting/parsing helpers.
+- Tests: `tithy_test.go`, `sign_test.go`, `nakshatra_test.go`, `util_test.go`.
+
+## Development environment
+
+- The module declares `go 1.25.6` in `go.mod`; use a compatible Go toolchain (>= 1.18 works for modules, but module Go version is 1.25.6).
+- Dependencies: `github.com/stretchr/testify` is used for assertions in tests.
+
+## Notes / Future work
+
+- `GetNakshatraPadaFromDegree` currently uses explicit ranges. It could be refactored into a data-driven table to improve maintainability.
+- Some functions return sentinel values on invalid inputs (e.g., `0` or `""`). If you prefer an error-returning API, that can be introduced in a breaking change with tests updated accordingly.
+- Consider adding linters (`golangci-lint`) to the CI workflow for stricter checks.
+
+---
+
+If you'd like, I can:
+- Add a short example program under `examples/` showing library usage.
+- Convert some large if/else mappings (nakshatra) into a data table with unit tests.
+- Add a status badge for the GitHub Actions workflow at the top of this README.
