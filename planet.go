@@ -1,5 +1,7 @@
 package baselib
 
+import "math"
+
 const (
 	SUN     = "Sun"
 	MOON    = "Moon"
@@ -46,11 +48,35 @@ type PlanetCord struct {
 	IsRetro      bool
 }
 
+// CalculateDerivedValues computes derived fields from raw numeric fields.
+// Improvements:
+// - Defensively handles NaN and +/-Inf inputs.
+// - Uses a normalized longitude for sign and nakshatra mapping (without mutating the stored longitude).
+// - Ensures IsRetro is only set when speed is a finite value.
 func (p *PlanetCord) CalculateDerivedValues() {
+	// Compute DMS representations. NewDMS / ParseFromDegree already handle NaN/Inf defensively,
+	// but we still call them explicitly to populate the DMS fields consistently.
 	p.LongitudeDMS = NewDMS(p.Longitude)
 	p.LatitudeDMS = NewDMS(p.Latitude)
 	p.SpeedLongDMS = NewDMS(p.SpeedLong)
-	p.Sign = GetSignFrmDegree(p.Longitude)
-	p.Nakshatra = GetNakshatraPadaFromDegree(p.Longitude)
-	p.IsRetro = p.SpeedLong < 0
+
+	// Determine sign and nakshatra using a normalized longitude.
+	// Do not mutate p.Longitude here so callers retain the original value.
+	if math.IsNaN(p.Longitude) || math.IsInf(p.Longitude, 0) {
+		// Invalid longitude -> clear sign and nakshatra to indicate unknown
+		p.Sign = ""
+		p.Nakshatra = NakshatraPada{}
+	} else {
+		normLon := normalizeAngle(p.Longitude)
+		// The helper functions will also defensively handle edge cases if necessary.
+		p.Sign = GetSignFrmDegree(normLon)
+		p.Nakshatra = GetNakshatraPadaFromDegree(normLon)
+	}
+
+	// Determine retrograde flag only when speed is finite.
+	if math.IsNaN(p.SpeedLong) || math.IsInf(p.SpeedLong, 0) {
+		p.IsRetro = false
+	} else {
+		p.IsRetro = p.SpeedLong < 0
+	}
 }
