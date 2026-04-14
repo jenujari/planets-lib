@@ -19,14 +19,44 @@ func NewDMS(degree float64) DMS {
 }
 
 func (d *DMS) ParseFromDegree(degree float64) {
-	d.IsNegative = false
-	if degree < 0 {
-		d.IsNegative = true
+	// Handle NaN and infinities defensively
+	if math.IsNaN(degree) || math.IsInf(degree, 0) {
+		d.IsNegative = false
+		d.D = 0
+		d.M = 0
+		d.S = 0
+		return
 	}
-	degree = math.Abs(degree)
-	d.D = int(degree)
-	d.M = int((degree - float64(d.D)) * 60)
-	d.S = float32((degree - float64(d.D) - float64(d.M)/60) * 3600)
+
+	// Preserve original behavior: treat -0 as non-negative
+	d.IsNegative = degree < 0
+	deg := math.Abs(degree)
+
+	// Compute degrees, minutes, seconds robustly to avoid rounding issues
+	d.D = int(math.Floor(deg))
+	fractionalMinutes := (deg - float64(d.D)) * 60
+	d.M = int(math.Floor(fractionalMinutes))
+	seconds := (fractionalMinutes - float64(d.M)) * 60
+
+	// Round seconds to 2 decimals to keep a consistent String() output
+	seconds = RoundTo2Decimals[float64](seconds)
+
+	// Handle cases where rounding pushes seconds or minutes to the next unit
+	if seconds >= 60 {
+		seconds -= 60
+		d.M += 1
+	}
+	if d.M >= 60 {
+		d.M -= 60
+		d.D += 1
+	}
+
+	// Clamp to non-negative values (sign is stored in IsNegative)
+	if seconds < 0 {
+		seconds = 0
+	}
+
+	d.S = float32(seconds)
 }
 
 func (dms DMS) ToDegree() float64 {
@@ -38,16 +68,17 @@ func (dms DMS) ToDegree() float64 {
 }
 
 func (d DMS) String() string {
-	Degree := int(math.Abs(float64(d.D)))
+	deg := int(math.Abs(float64(d.D)))
 	minutes := int(math.Abs(float64(d.M)))
 	second := float32(math.Abs(float64(d.S)))
 	if d.IsNegative {
-		return fmt.Sprintf("-%d°%d'%.2f\"", Degree, minutes, second)
+		return fmt.Sprintf("-%d°%d'%.2f\"", deg, minutes, second)
 	} else {
-		return fmt.Sprintf("%d°%d'%.2f\"", Degree, minutes, second)
+		return fmt.Sprintf("%d°%d'%.2f\"", deg, minutes, second)
 	}
 }
 
 func RoundTo2Decimals[T float64 | float32](val T) T {
+	// Convert once to float64 for rounding and then convert back to T
 	return T(math.Round(float64(val)*100) / 100)
 }

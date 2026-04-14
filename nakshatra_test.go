@@ -1,0 +1,211 @@
+package baselib
+
+import (
+	"math"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestGetNakshatraPadaFromDegree_NormalizationAndBoundaries(t *testing.T) {
+	tests := []struct {
+		name     string
+		deg      float64
+		expected NakshatraPada
+	}{
+		{
+			name: "small positive inside first pada -> Ashwini p1",
+			deg:  1.5,
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 1,
+			},
+		},
+		{
+			name: "just below 3.333333 -> Ashwini p1",
+			deg:  3.333333 - 1e-6,
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 1,
+			},
+		},
+		{
+			name: "exact 3.333333 -> Ashwini p2",
+			deg:  3.333333,
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 2,
+			},
+		},
+		{
+			name: "near top of circle -> Revati p4",
+			deg:  359.999,
+			expected: NakshatraPada{
+				Name: NAKSHATRA_REVATI,
+				Pada: 4,
+			},
+		},
+		{
+			name: "exact 360 normalizes to 0 -> Ashwini p1",
+			deg:  360.0,
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 1,
+			},
+		},
+		{
+			name: "large positive normalizes -> Ashwini p1",
+			deg:  721.5, // 721.5 % 360 = 1.5
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 1,
+			},
+		},
+		{
+			name: "large negative normalizes -> Ashwini p1",
+			deg:  -358.5, // -358.5 normalized = 1.5
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 1,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetNakshatraPadaFromDegree(tt.deg)
+			assert.Equal(t, tt.expected.Name, got.Name, "nakshatra name mismatch")
+			assert.Equal(t, tt.expected.Pada, got.Pada, "nakshatra pada mismatch")
+		})
+	}
+}
+
+func TestGetNakshatraPadaFromDegree_InvalidInputs(t *testing.T) {
+	cases := []struct {
+		name string
+		deg  float64
+	}{
+		{"NaN input", math.NaN()},
+		{"+Inf input", math.Inf(1)},
+		{"-Inf input", math.Inf(-1)},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := GetNakshatraPadaFromDegree(c.deg)
+			assert.Equal(t, "", got.Name, "expected empty name for invalid input")
+			assert.Equal(t, 0, got.Pada, "expected pada 0 for invalid input")
+		})
+	}
+}
+
+func TestGetNakshatraFromVowel_BasicMappings(t *testing.T) {
+	tests := []struct {
+		code     string
+		expected NakshatraPada
+	}{
+		{
+			code: "CHU",
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 1,
+			},
+		},
+		{
+			code: "CHE",
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ASHWINI,
+				Pada: 2,
+			},
+		},
+		{
+			code: "AA",
+			expected: NakshatraPada{
+				Name: NAKSHATRA_KRITTICA,
+				Pada: 1,
+			},
+		},
+		{
+			// some code mapped in original file
+			code: "O",
+			expected: NakshatraPada{
+				Name: NAKSHATRA_ROHINI,
+				Pada: 1,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.code, func(t *testing.T) {
+			got := GetNakshatraFromVowel(tt.code)
+			assert.Equal(t, tt.expected.Name, got.Name)
+			assert.Equal(t, tt.expected.Pada, got.Pada)
+		})
+	}
+}
+
+func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
+	// Case A: finite longitude that needs normalization and negative speed -> retrograde true
+	p := &PlanetCord{
+		Longitude: 721.5, // normalizes to 1.5 -> Aries, Ashwini p1
+		Latitude:  -5.25,
+		SpeedLong: -1.234,
+	}
+
+	p.CalculateDerivedValues()
+
+	// Sign based on normalized longitude
+	assert.Equal(t, SIGN_ARIES, p.Sign)
+	// Nakshatra should be Ashwini pada 1
+	assert.Equal(t, NAKSHATRA_ASHWINI, p.Nakshatra.Name)
+	assert.Equal(t, 1, p.Nakshatra.Pada)
+	// Retrograde must be true for negative finite speed
+	assert.True(t, p.IsRetro)
+
+	// DMS rounding: ensure LongitudeDMS.ToDegree approximates original absolute degree
+	lonDeg := p.LongitudeDMS.ToDegree()
+	if math.Abs(lonDeg-math.Abs(p.Longitude)) > 0.02 {
+		t.Fatalf("LongitudeDMS.ToDegree expected approx %v, got %v", math.Abs(p.Longitude), lonDeg)
+	}
+
+	// Case B: NaN longitude and NaN speed -> sign empty, nakshatra zero, isRetro false, DMS zeroed
+	p2 := &PlanetCord{
+		Longitude: math.NaN(),
+		Latitude:  math.NaN(),
+		SpeedLong: math.NaN(),
+	}
+
+	p2.CalculateDerivedValues()
+
+	assert.Equal(t, "", p2.Sign, "expected empty sign for NaN longitude")
+	assert.Equal(t, "", p2.Nakshatra.Name, "expected empty nakshatra name for NaN longitude")
+	assert.Equal(t, 0, p2.Nakshatra.Pada, "expected pada 0 for NaN longitude")
+	assert.False(t, p2.IsRetro, "expected IsRetro false for NaN speed")
+
+	// DMS fields for NaN should be zeroed as per NewDMS/ParseFromDegree contract
+	assert.Equal(t, 0, p2.LongitudeDMS.D)
+	assert.Equal(t, 0, p2.LongitudeDMS.M)
+	assert.Equal(t, float32(0), p2.LongitudeDMS.S)
+
+	// Case C: boundary values - sign and nakshatra at exact boundaries
+	p3 := &PlanetCord{
+		Longitude: 3.333333, // should map to Ashwini pada 2
+		SpeedLong: 0.5,
+	}
+	p3.CalculateDerivedValues()
+	assert.Equal(t, SIGN_ARIES, p3.Sign)
+	assert.Equal(t, NAKSHATRA_ASHWINI, p3.Nakshatra.Name)
+	assert.Equal(t, 2, p3.Nakshatra.Pada)
+	assert.False(t, p3.IsRetro)
+
+	// Case D: near 360 boundary -> sign Pisces, nakshatra Revati p4
+	p4 := &PlanetCord{
+		Longitude: 359.999,
+		SpeedLong: 0.1,
+	}
+	p4.CalculateDerivedValues()
+	assert.Equal(t, SIGN_PISCES, p4.Sign)
+	assert.Equal(t, NAKSHATRA_REVATI, p4.Nakshatra.Name)
+	assert.Equal(t, 4, p4.Nakshatra.Pada)
+	assert.False(t, p4.IsRetro)
+}

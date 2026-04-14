@@ -48,13 +48,25 @@ var SIGN_COUNT = map[string]int{
 }
 
 func GetSignFrmDegree(d float64) string {
-	d = math.Abs(d)
-
-	if d > 360 {
-		d = math.Mod(d, 360)
+	// Guard against invalid floating-point inputs.
+	if math.IsNaN(d) || math.IsInf(d, 0) {
+		return ""
 	}
 
-	signIndex := int(d / 30)
+	// Normalize to [0,360) using shared helper. This handles negative angles
+	// and large values consistently with other functions in the package.
+	nd := normalizeAngle(d)
+
+	// Each zodiac sign spans 30 degrees.
+	signIndex := int(nd / 30.0)
+
+	// Defensive clamping to ensure index is always valid.
+	if signIndex < 0 {
+		signIndex = 0
+	}
+	if signIndex >= len(SIGNS) {
+		signIndex = len(SIGNS) - 1
+	}
 
 	return SIGNS[signIndex]
 }
