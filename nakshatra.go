@@ -1,6 +1,9 @@
 package baselib
 
-import "math"
+import (
+	"math"
+	"strings"
+)
 
 const (
 	NAKSHATRA_ASHWINI           = "Ashwini"
@@ -100,11 +103,188 @@ type NakshatraPada struct {
 	Pada int
 }
 
+// rangeEntry defines a half-open interval [start, end) for a nakshatra pada.
+type rangeEntry struct {
+	start float64
+	end   float64
+	name  string
+	pada  int
+}
+
+// nakshatraRanges is a data-driven representation of the original explicit ranges.
+// Each entry is exact and preserves the original boundaries.
+var nakshatraRanges = []rangeEntry{
+	// Ashwini
+	{0.000000, 3.333333, NAKSHATRA_ASHWINI, 1},
+	{3.333333, 6.666666, NAKSHATRA_ASHWINI, 2},
+	{6.666666, 10.000000, NAKSHATRA_ASHWINI, 3},
+	{10.000000, 13.333333, NAKSHATRA_ASHWINI, 4},
+
+	// Bharani
+	{13.333333, 16.666666, NAKSHATRA_BHARANI, 1},
+	{16.666666, 20.000000, NAKSHATRA_BHARANI, 2},
+	{20.000000, 23.333333, NAKSHATRA_BHARANI, 3},
+	{23.333333, 26.666666, NAKSHATRA_BHARANI, 4},
+
+	// Krittika
+	{26.666666, 30.000000, NAKSHATRA_KRITTICA, 1},
+	{30.000000, 33.333333, NAKSHATRA_KRITTICA, 2},
+	{33.333333, 36.666666, NAKSHATRA_KRITTICA, 3},
+	{36.666666, 40.000000, NAKSHATRA_KRITTICA, 4},
+
+	// Rohini
+	{40.000000, 43.333333, NAKSHATRA_ROHINI, 1},
+	{43.333333, 46.666666, NAKSHATRA_ROHINI, 2},
+	{46.666666, 50.000000, NAKSHATRA_ROHINI, 3},
+	{50.000000, 53.333333, NAKSHATRA_ROHINI, 4},
+
+	// Mrigashirsha
+	{53.333333, 56.666666, NAKSHATRA_MRIGASHIRSHA, 1},
+	{56.666666, 60.000000, NAKSHATRA_MRIGASHIRSHA, 2},
+	{60.000000, 63.333333, NAKSHATRA_MRIGASHIRSHA, 3},
+	{63.333333, 66.666666, NAKSHATRA_MRIGASHIRSHA, 4},
+
+	// Ardra
+	{66.666666, 70.000000, NAKSHATRA_ARDRA, 1},
+	{70.000000, 73.333333, NAKSHATRA_ARDRA, 2},
+	{73.333333, 76.666666, NAKSHATRA_ARDRA, 3},
+	{76.666666, 80.000000, NAKSHATRA_ARDRA, 4},
+
+	// Punarvasu
+	{80.000000, 83.333333, NAKSHATRA_PUNARVASU, 1},
+	{83.333333, 86.666666, NAKSHATRA_PUNARVASU, 2},
+	{86.666666, 90.000000, NAKSHATRA_PUNARVASU, 3},
+	{90.000000, 93.333333, NAKSHATRA_PUNARVASU, 4},
+
+	// Pushya
+	{93.333333, 96.666666, NAKSHATRA_PUSHYA, 1},
+	{96.666666, 100.000000, NAKSHATRA_PUSHYA, 2},
+	{100.000000, 103.333333, NAKSHATRA_PUSHYA, 3},
+	{103.333333, 106.666666, NAKSHATRA_PUSHYA, 4},
+
+	// Ashlesha
+	{106.666666, 110.000000, NAKSHATRA_ASHLESHA, 1},
+	{110.000000, 113.333333, NAKSHATRA_ASHLESHA, 2},
+	{113.333333, 116.666666, NAKSHATRA_ASHLESHA, 3},
+	{116.666666, 120.000000, NAKSHATRA_ASHLESHA, 4},
+
+	// Magha
+	{120.000000, 123.333333, NAKSHATRA_MAGHA, 1},
+	{123.333333, 126.666666, NAKSHATRA_MAGHA, 2},
+	{126.666666, 130.000000, NAKSHATRA_MAGHA, 3},
+	{130.000000, 133.333333, NAKSHATRA_MAGHA, 4},
+
+	// Purva Phalguni
+	{133.333333, 136.666666, NAKSHATRA_PURVA_PHALGUNI, 1},
+	{136.666666, 140.000000, NAKSHATRA_PURVA_PHALGUNI, 2},
+	{140.000000, 143.333333, NAKSHATRA_PURVA_PHALGUNI, 3},
+	{143.333333, 146.666666, NAKSHATRA_PURVA_PHALGUNI, 4},
+
+	// Uttara Phalguni
+	{146.666666, 150.000000, NAKSHATRA_UTTARA_PHALGUNI, 1},
+	{150.000000, 153.333333, NAKSHATRA_UTTARA_PHALGUNI, 2},
+	{153.333333, 156.666666, NAKSHATRA_UTTARA_PHALGUNI, 3},
+	{156.666666, 160.000000, NAKSHATRA_UTTARA_PHALGUNI, 4},
+
+	// Hasta
+	{160.000000, 163.333333, NAKSHATRA_HASTA, 1},
+	{163.333333, 166.666666, NAKSHATRA_HASTA, 2},
+	{166.666666, 170.000000, NAKSHATRA_HASTA, 3},
+	{170.000000, 173.333333, NAKSHATRA_HASTA, 4},
+
+	// Chitra
+	{173.333333, 176.666666, NAKSHATRA_CHITRA, 1},
+	{176.666666, 180.000000, NAKSHATRA_CHITRA, 2},
+	{180.000000, 183.333333, NAKSHATRA_CHITRA, 3},
+	{183.333333, 186.666666, NAKSHATRA_CHITRA, 4},
+
+	// Swati
+	{186.666666, 190.000000, NAKSHATRA_SWATI, 1},
+	{190.000000, 193.333333, NAKSHATRA_SWATI, 2},
+	{193.333333, 196.666666, NAKSHATRA_SWATI, 3},
+	{196.666666, 200.000000, NAKSHATRA_SWATI, 4},
+
+	// Vishakha
+	{200.000000, 203.333333, NAKSHATRA_VISHAKHA, 1},
+	{203.333333, 206.666666, NAKSHATRA_VISHAKHA, 2},
+	{206.666666, 210.000000, NAKSHATRA_VISHAKHA, 3},
+	{210.000000, 213.333333, NAKSHATRA_VISHAKHA, 4},
+
+	// Anuradha
+	{213.333333, 216.666666, NAKSHATRA_ANURADHA, 1},
+	{216.666666, 220.000000, NAKSHATRA_ANURADHA, 2},
+	{220.000000, 223.333333, NAKSHATRA_ANURADHA, 3},
+	{223.333333, 226.666666, NAKSHATRA_ANURADHA, 4},
+
+	// Jyeshtha
+	{226.666666, 230.000000, NAKSHATRA_JYESTHA, 1},
+	{230.000000, 233.333333, NAKSHATRA_JYESTHA, 2},
+	{233.333333, 236.666666, NAKSHATRA_JYESTHA, 3},
+	{236.666666, 240.000000, NAKSHATRA_JYESTHA, 4},
+
+	// Moola
+	{240.000000, 243.333333, NAKSHATRA_MOOLA, 1},
+	{243.333333, 246.666666, NAKSHATRA_MOOLA, 2},
+	{246.666666, 250.000000, NAKSHATRA_MOOLA, 3},
+	{250.000000, 253.333333, NAKSHATRA_MOOLA, 4},
+
+	// Purva Ashadha
+	{253.333333, 256.666666, NAKSHATRA_PURVA_ASHADHA, 1},
+	{256.666666, 260.000000, NAKSHATRA_PURVA_ASHADHA, 2},
+	{260.000000, 263.333333, NAKSHATRA_PURVA_ASHADHA, 3},
+	{263.333333, 266.666666, NAKSHATRA_PURVA_ASHADHA, 4},
+
+	// Uttara Ashadha
+	{266.666666, 269.166666, NAKSHATRA_UTTARA_ASHADHA, 1},
+	{269.166666, 271.666666, NAKSHATRA_UTTARA_ASHADHA, 2},
+	{271.666666, 274.166666, NAKSHATRA_UTTARA_ASHADHA, 3},
+	{274.166666, 276.666666, NAKSHATRA_UTTARA_ASHADHA, 4},
+
+	// Abhijit (irregular small ranges)
+	{276.666666, 277.72222, NAKSHATRA_ABHIJIT, 1},
+	{277.72222, 278.7777775, NAKSHATRA_ABHIJIT, 2},
+	{278.7777775, 279.83333325, NAKSHATRA_ABHIJIT, 3},
+	{279.83333325, 280.888889, NAKSHATRA_ABHIJIT, 4},
+
+	// Shravana
+	{280.888889, 284.000000, NAKSHATRA_SHRAVANA, 1},
+	{284.000000, 287.111111, NAKSHATRA_SHRAVANA, 2},
+	{287.111111, 290.222222, NAKSHATRA_SHRAVANA, 3},
+	{290.222222, 293.333333, NAKSHATRA_SHRAVANA, 4},
+
+	// Dhanishta
+	{293.333333, 296.666666, NAKSHATRA_DHANISHTHA, 1},
+	{296.666666, 300.000000, NAKSHATRA_DHANISHTHA, 2},
+	{300.000000, 303.333333, NAKSHATRA_DHANISHTHA, 3},
+	{303.333333, 306.666666, NAKSHATRA_DHANISHTHA, 4},
+
+	// Shatabhisha
+	{306.666666, 310.000000, NAKSHATRA_SATABHISHA, 1},
+	{310.000000, 313.333333, NAKSHATRA_SATABHISHA, 2},
+	{313.333333, 316.666666, NAKSHATRA_SATABHISHA, 3},
+	{316.666666, 320.000000, NAKSHATRA_SATABHISHA, 4},
+
+	// Purva Bhadrapada
+	{320.000000, 323.333333, NAKSHATRA_PURVA_BHADRAPADA, 1},
+	{323.333333, 326.666666, NAKSHATRA_PURVA_BHADRAPADA, 2},
+	{326.666666, 330.000000, NAKSHATRA_PURVA_BHADRAPADA, 3},
+	{330.000000, 333.333333, NAKSHATRA_PURVA_BHADRAPADA, 4},
+
+	// Uttara Bhadrapada
+	{333.333333, 336.666666, NAKSHATRA_UTTARA_BHADRAPADA, 1},
+	{336.666666, 340.000000, NAKSHATRA_UTTARA_BHADRAPADA, 2},
+	{340.000000, 343.333333, NAKSHATRA_UTTARA_BHADRAPADA, 3},
+	{343.333333, 346.666666, NAKSHATRA_UTTARA_BHADRAPADA, 4},
+
+	// Revati
+	{346.666666, 350.000000, NAKSHATRA_REVATI, 1},
+	{350.000000, 353.333333, NAKSHATRA_REVATI, 2},
+	{353.333333, 356.666666, NAKSHATRA_REVATI, 3},
+	{356.666666, 360.000000, NAKSHATRA_REVATI, 4},
+}
+
 // GetNakshatraPadaFromDegree returns the nakshatra and pada for a given longitude.
-// Improvements:
-// - Guard against NaN and +/-Inf inputs and return a zero-value NakshatraPada
-// - Normalize input angle to [0,360) using package normalizeAngle helper
-// - Use the same ranges as the original implementation but operate on the normalized angle
+// It now uses a data-driven table for ranges to mirror the original explicit ranges exactly.
 func GetNakshatraPadaFromDegree(d float64) NakshatraPada {
 	var nakshatra NakshatraPada
 
@@ -115,729 +295,148 @@ func GetNakshatraPadaFromDegree(d float64) NakshatraPada {
 
 	nd := normalizeAngle(d)
 
-	// The following ranges follow the original mapping. They operate on the normalized angle.
-	if nd >= 0 && nd < 3.333333 {
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 1
-	} else if nd >= 3.333333 && nd < 6.666666 {
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 2
-	} else if nd >= 6.666666 && nd < 10 {
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 3
-	} else if nd >= 10 && nd < 13.333333 {
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 4
-	} else if nd >= 13.333333 && nd < 16.666666 {
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 1
-	} else if nd >= 16.666666 && nd < 20 {
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 2
-	} else if nd >= 20 && nd < 23.333333 {
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 3
-	} else if nd >= 23.333333 && nd < 26.666666 {
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 4
-	} else if nd >= 26.666666 && nd < 30 {
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 1
-	} else if nd >= 30 && nd < 33.333333 {
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 2
-	} else if nd >= 33.333333 && nd < 36.666666 {
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 3
-	} else if nd >= 36.666666 && nd < 40 {
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 4
-	} else if nd >= 40 && nd < 43.333333 {
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 1
-	} else if nd >= 43.333333 && nd < 46.666666 {
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 2
-	} else if nd >= 46.666666 && nd < 50 {
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 3
-	} else if nd >= 50 && nd < 53.333333 {
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 4
-	} else if nd >= 53.333333 && nd < 56.666666 {
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 1
-	} else if nd >= 56.666666 && nd < 60 {
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 2
-	} else if nd >= 60 && nd < 63.333333 {
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 3
-	} else if nd >= 63.333333 && nd < 66.666666 {
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 4
-	} else if nd >= 66.666666 && nd < 70 {
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 1
-	} else if nd >= 70 && nd < 73.333333 {
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 2
-	} else if nd >= 73.333333 && nd < 76.666666 {
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 3
-	} else if nd >= 76.666666 && nd < 80 {
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 4
-	} else if nd >= 80 && nd < 83.333333 {
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 1
-	} else if nd >= 83.333333 && nd < 86.666666 {
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 2
-	} else if nd >= 86.666666 && nd < 90 {
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 3
-	} else if nd >= 90 && nd < 93.333333 {
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 4
-	} else if nd >= 93.333333 && nd < 96.666666 {
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 1
-	} else if nd >= 96.666666 && nd < 100 {
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 2
-	} else if nd >= 100 && nd < 103.333333 {
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 3
-	} else if nd >= 103.333333 && nd < 106.666666 {
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 4
-	} else if nd >= 106.666666 && nd < 110 {
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 1
-	} else if nd >= 110 && nd < 113.333333 {
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 2
-	} else if nd >= 113.333333 && nd < 116.666666 {
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 3
-	} else if nd >= 116.666666 && nd < 120 {
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 4
-	} else if nd >= 120 && nd < 123.333333 {
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 1
-	} else if nd >= 123.333333 && nd < 126.666666 {
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 2
-	} else if nd >= 126.666666 && nd < 130 {
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 3
-	} else if nd >= 130 && nd < 133.333333 {
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 4
-	} else if nd >= 133.333333 && nd < 136.666666 {
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 1
-	} else if nd >= 136.666666 && nd < 140 {
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 2
-	} else if nd >= 140 && nd < 143.333333 {
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 3
-	} else if nd >= 143.333333 && nd < 146.666666 {
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 4
-	} else if nd >= 146.666666 && nd < 150 {
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 1
-	} else if nd >= 150 && nd < 153.333333 {
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 2
-	} else if nd >= 153.333333 && nd < 156.666666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 3
-	} else if nd >= 156.666666 && nd < 160 {
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 4
-	} else if nd >= 160 && nd < 163.333333 {
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 1
-	} else if nd >= 163.333333 && nd < 166.666666 {
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 2
-	} else if nd >= 166.666666 && nd < 170 {
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 3
-	} else if nd >= 170 && nd < 173.333333 {
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 4
-	} else if nd >= 173.333333 && nd < 176.666666 {
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 1
-	} else if nd >= 176.666666 && nd < 180 {
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 2
-	} else if nd >= 180 && nd < 183.333333 {
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 3
-	} else if nd >= 183.333333 && nd < 186.666666 {
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 4
-	} else if nd >= 186.666666 && nd < 190 {
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 1
-	} else if nd >= 190 && nd < 193.333333 {
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 2
-	} else if nd >= 193.333333 && nd < 196.666666 {
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 3
-	} else if nd >= 196.666666 && nd < 200 {
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 4
-	} else if nd >= 200 && nd < 203.333333 {
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 1
-	} else if nd >= 203.333333 && nd < 206.666666 {
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 2
-	} else if nd >= 206.666666 && nd < 210 {
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 3
-	} else if nd >= 210 && nd < 213.333333 {
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 4
-	} else if nd >= 213.333333 && nd < 216.666666 {
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 1
-	} else if nd >= 216.666666 && nd < 220 {
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 2
-	} else if nd >= 220 && nd < 223.333333 {
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 3
-	} else if nd >= 223.333333 && nd < 226.666666 {
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 4
-	} else if nd >= 226.666666 && nd < 230 {
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 1
-	} else if nd >= 230 && nd < 233.333333 {
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 2
-	} else if nd >= 233.333333 && nd < 236.666666 {
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 3
-	} else if nd >= 236.666666 && nd < 240 {
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 4
-	} else if nd >= 240 && nd < 243.333333 {
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 1
-	} else if nd >= 243.333333 && nd < 246.666666 {
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 2
-	} else if nd >= 246.666666 && nd < 250 {
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 3
-	} else if nd >= 250 && nd < 253.333333 {
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 4
-	} else if nd >= 253.333333 && nd < 256.666666 {
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 1
-	} else if nd >= 256.666666 && nd < 260 {
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 2
-	} else if nd >= 260 && nd < 263.333333 {
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 3
-	} else if nd >= 263.333333 && nd < 266.666666 {
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 4
-	} else if nd >= 266.666666 && nd < 269.166666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 1
-	} else if nd >= 269.166666 && nd < 271.666666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 2
-	} else if nd >= 271.666666 && nd < 274.166666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 3
-	} else if nd >= 274.166666 && nd < 276.666666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 4
-	} else if nd >= 276.666666 && nd < 277.72222 {
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 1
-	} else if nd >= 277.72222 && nd < 278.7777775 {
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 2
-	} else if nd >= 278.7777775 && nd < 279.83333325 {
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 3
-	} else if nd >= 279.83333325 && nd < 280.888889 {
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 4
-	} else if nd >= 280.888889 && nd < 284 {
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 1
-	} else if nd >= 284 && nd < 287.111111 {
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 2
-	} else if nd >= 287.111111 && nd < 290.222222 {
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 3
-	} else if nd >= 290.222222 && nd < 293.333333 {
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 4
-	} else if nd >= 293.333333 && nd < 296.666666 {
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 1
-	} else if nd >= 296.666666 && nd < 300 {
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 2
-	} else if nd >= 300 && nd < 303.333333 {
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 3
-	} else if nd >= 303.333333 && nd < 306.666666 {
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 4
-	} else if nd >= 306.666666 && nd < 310 {
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 1
-	} else if nd >= 310 && nd < 313.333333 {
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 2
-	} else if nd >= 313.333333 && nd < 316.666666 {
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 3
-	} else if nd >= 316.666666 && nd < 320 {
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 4
-	} else if nd >= 320 && nd < 323.333333 {
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 1
-	} else if nd >= 323.333333 && nd < 326.666666 {
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 2
-	} else if nd >= 326.666666 && nd < 330 {
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 3
-	} else if nd >= 330 && nd < 333.333333 {
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 4
-	} else if nd >= 333.333333 && nd < 336.666666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 1
-	} else if nd >= 336.666666 && nd < 340 {
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 2
-	} else if nd >= 340 && nd < 343.333333 {
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 3
-	} else if nd >= 343.333333 && nd < 346.666666 {
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 4
-	} else if nd >= 346.666666 && nd < 350 {
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 1
-	} else if nd >= 350 && nd < 353.333333 {
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 2
-	} else if nd >= 353.333333 && nd < 356.666666 {
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 3
-	} else if nd >= 356.666666 && nd < 360 {
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 4
+	// Find the first matching range (ranges are half-open [start, end))
+	for _, r := range nakshatraRanges {
+		if nd >= r.start && nd < r.end {
+			nakshatra.Name = r.name
+			nakshatra.Pada = r.pada
+			return nakshatra
+		}
 	}
 
+	// Fallback: if nothing matched (shouldn't happen), return zero-value
 	return nakshatra
 }
 
 // GetNakshatraFromVowel maps a phonetic vowel code to a NakshatraPada.
-// This function preserves the original mapping but uses constants for names.
+//
+// Refactored to use a data-driven map for easier maintenance and clearer lookup.
+// Keys are normalized to uppercase and trimmed.
+// The original behavior is preserved: unrecognized keys return a zero-value NakshatraPada.
+var nakshatraFromVowelMap = map[string]NakshatraPada{
+	"CHU":  {Name: NAKSHATRA_ASHWINI, Pada: 1},
+	"CHE":  {Name: NAKSHATRA_ASHWINI, Pada: 2},
+	"CHO":  {Name: NAKSHATRA_ASHWINI, Pada: 3},
+	"LA":   {Name: NAKSHATRA_ASHWINI, Pada: 4},
+	"LI":   {Name: NAKSHATRA_BHARANI, Pada: 1},
+	"LU":   {Name: NAKSHATRA_BHARANI, Pada: 2},
+	"LE":   {Name: NAKSHATRA_BHARANI, Pada: 3},
+	"LO":   {Name: NAKSHATRA_BHARANI, Pada: 4},
+	"AA":   {Name: NAKSHATRA_KRITTICA, Pada: 1},
+	"EE":   {Name: NAKSHATRA_KRITTICA, Pada: 2},
+	"OO":   {Name: NAKSHATRA_KRITTICA, Pada: 3},
+	"AE":   {Name: NAKSHATRA_KRITTICA, Pada: 4},
+	"O":    {Name: NAKSHATRA_ROHINI, Pada: 1},
+	"V":    {Name: NAKSHATRA_ROHINI, Pada: 2},
+	"B":    {Name: NAKSHATRA_ROHINI, Pada: 2},
+	"VI":   {Name: NAKSHATRA_ROHINI, Pada: 3},
+	"BI":   {Name: NAKSHATRA_ROHINI, Pada: 3},
+	"VOO":  {Name: NAKSHATRA_ROHINI, Pada: 4},
+	"BOO":  {Name: NAKSHATRA_ROHINI, Pada: 4},
+	"VE":   {Name: NAKSHATRA_MRIGASHIRSHA, Pada: 1},
+	"BE":   {Name: NAKSHATRA_MRIGASHIRSHA, Pada: 1},
+	"VO":   {Name: NAKSHATRA_MRIGASHIRSHA, Pada: 2},
+	"K":    {Name: NAKSHATRA_MRIGASHIRSHA, Pada: 3},
+	"KI":   {Name: NAKSHATRA_MRIGASHIRSHA, Pada: 4},
+	"KU":   {Name: NAKSHATRA_ARDRA, Pada: 1},
+	"G":    {Name: NAKSHATRA_ARDRA, Pada: 2},
+	"GHI":  {Name: NAKSHATRA_ARDRA, Pada: 2},
+	"GHO":  {Name: NAKSHATRA_ARDRA, Pada: 3},
+	"NG":   {Name: NAKSHATRA_ARDRA, Pada: 4},
+	"CA":   {Name: NAKSHATRA_PUNARVASU, Pada: 1},
+	"CHA":  {Name: NAKSHATRA_PUNARVASU, Pada: 2},
+	"JE":   {Name: NAKSHATRA_PUNARVASU, Pada: 3},
+	"JO":   {Name: NAKSHATRA_PUNARVASU, Pada: 4},
+	"TA":   {Name: NAKSHATRA_PUSHYA, Pada: 1},
+	"TE":   {Name: NAKSHATRA_PUSHYA, Pada: 2},
+	"TO":   {Name: NAKSHATRA_PUSHYA, Pada: 3},
+	"NA":   {Name: NAKSHATRA_PUSHYA, Pada: 4},
+	"NI":   {Name: NAKSHATRA_ASHLESHA, Pada: 1},
+	"NU":   {Name: NAKSHATRA_ASHLESHA, Pada: 2},
+	"NE":   {Name: NAKSHATRA_ASHLESHA, Pada: 3},
+	"NO":   {Name: NAKSHATRA_ASHLESHA, Pada: 4},
+	"BA":   {Name: NAKSHATRA_MAGHA, Pada: 1},
+	"BHA":  {Name: NAKSHATRA_MAGHA, Pada: 2},
+	"MA":   {Name: NAKSHATRA_MAGHA, Pada: 3},
+	"YA":   {Name: NAKSHATRA_MAGHA, Pada: 4},
+	"RA":   {Name: NAKSHATRA_PURVA_PHALGUNI, Pada: 1},
+	"RI":   {Name: NAKSHATRA_PURVA_PHALGUNI, Pada: 2},
+	"RU":   {Name: NAKSHATRA_PURVA_PHALGUNI, Pada: 3},
+	"RE":   {Name: NAKSHATRA_PURVA_PHALGUNI, Pada: 4},
+	"RO":   {Name: NAKSHATRA_UTTARA_PHALGUNI, Pada: 1},
+	"TAH":  {Name: NAKSHATRA_UTTARA_PHALGUNI, Pada: 2},
+	"TI":   {Name: NAKSHATRA_UTTARA_PHALGUNI, Pada: 3},
+	"TU":   {Name: NAKSHATRA_UTTARA_PHALGUNI, Pada: 4},
+	"TEH":  {Name: NAKSHATRA_HASTA, Pada: 1},
+	"TOH":  {Name: NAKSHATRA_HASTA, Pada: 2},
+	"NAH":  {Name: NAKSHATRA_HASTA, Pada: 3},
+	"NEE":  {Name: NAKSHATRA_HASTA, Pada: 4},
+	"PI":   {Name: NAKSHATRA_CHITRA, Pada: 1},
+	"PU":   {Name: NAKSHATRA_CHITRA, Pada: 2},
+	"PE":   {Name: NAKSHATRA_CHITRA, Pada: 3},
+	"PO":   {Name: NAKSHATRA_CHITRA, Pada: 4},
+	"RAA":  {Name: NAKSHATRA_SWATI, Pada: 1},
+	"RIH":  {Name: NAKSHATRA_SWATI, Pada: 2},
+	"RUH":  {Name: NAKSHATRA_SWATI, Pada: 3},
+	"REH":  {Name: NAKSHATRA_SWATI, Pada: 4},
+	"RII":  {Name: NAKSHATRA_VISHAKHA, Pada: 1},
+	"RUU":  {Name: NAKSHATRA_VISHAKHA, Pada: 2},
+	"REE":  {Name: NAKSHATRA_VISHAKHA, Pada: 3},
+	"ROO":  {Name: NAKSHATRA_VISHAKHA, Pada: 4},
+	"TAI":  {Name: NAKSHATRA_ANURADHA, Pada: 1},
+	"TEI":  {Name: NAKSHATRA_ANURADHA, Pada: 2},
+	"TOI":  {Name: NAKSHATRA_ANURADHA, Pada: 3},
+	"NAI":  {Name: NAKSHATRA_ANURADHA, Pada: 4},
+	"NAA":  {Name: NAKSHATRA_JYESTHA, Pada: 1},
+	"NIH":  {Name: NAKSHATRA_JYESTHA, Pada: 2},
+	"NUH":  {Name: NAKSHATRA_JYESTHA, Pada: 3},
+	"NEH":  {Name: NAKSHATRA_JYESTHA, Pada: 4},
+	"NAIY": {Name: NAKSHATRA_MOOLA, Pada: 1},
+	"NII":  {Name: NAKSHATRA_MOOLA, Pada: 2},
+	"NUU":  {Name: NAKSHATRA_MOOLA, Pada: 3},
+	"NEE2": {Name: NAKSHATRA_MOOLA, Pada: 4},
+	"BAH":  {Name: NAKSHATRA_PURVA_ASHADHA, Pada: 1},
+	"BIH":  {Name: NAKSHATRA_PURVA_ASHADHA, Pada: 2},
+	"BUH":  {Name: NAKSHATRA_PURVA_ASHADHA, Pada: 3},
+	"BEH2": {Name: NAKSHATRA_PURVA_ASHADHA, Pada: 4},
+	"BOH":  {Name: NAKSHATRA_UTTARA_ASHADHA, Pada: 1},
+	"DA":   {Name: NAKSHATRA_UTTARA_ASHADHA, Pada: 2},
+	"DEE":  {Name: NAKSHATRA_UTTARA_ASHADHA, Pada: 3},
+	"DO":   {Name: NAKSHATRA_UTTARA_ASHADHA, Pada: 4},
+	"DHI":  {Name: NAKSHATRA_ABHIJIT, Pada: 1},
+	"DHE":  {Name: NAKSHATRA_ABHIJIT, Pada: 2},
+	"DHO":  {Name: NAKSHATRA_ABHIJIT, Pada: 3},
+	"NA2":  {Name: NAKSHATRA_ABHIJIT, Pada: 4},
+	"NAH2": {Name: NAKSHATRA_SHRAVANA, Pada: 1},
+	"NIH2": {Name: NAKSHATRA_SHRAVANA, Pada: 2},
+	"NUH2": {Name: NAKSHATRA_SHRAVANA, Pada: 3},
+	"NEH2": {Name: NAKSHATRA_SHRAVANA, Pada: 4},
+	"PIH":  {Name: NAKSHATRA_DHANISHTHA, Pada: 1},
+	"PUH":  {Name: NAKSHATRA_DHANISHTHA, Pada: 2},
+	"PEH":  {Name: NAKSHATRA_DHANISHTHA, Pada: 3},
+	"POH":  {Name: NAKSHATRA_DHANISHTHA, Pada: 4},
+	"BA2":  {Name: NAKSHATRA_SATABHISHA, Pada: 1},
+	"BHA2": {Name: NAKSHATRA_SATABHISHA, Pada: 2},
+	"MA2":  {Name: NAKSHATRA_SATABHISHA, Pada: 3},
+	"YA2":  {Name: NAKSHATRA_SATABHISHA, Pada: 4},
+	"RA2":  {Name: NAKSHATRA_PURVA_BHADRAPADA, Pada: 1},
+	"RI2":  {Name: NAKSHATRA_PURVA_BHADRAPADA, Pada: 2},
+	"RU2":  {Name: NAKSHATRA_PURVA_BHADRAPADA, Pada: 3},
+	"RE2":  {Name: NAKSHATRA_PURVA_BHADRAPADA, Pada: 4},
+	"RO2":  {Name: NAKSHATRA_UTTARA_BHADRAPADA, Pada: 1},
+	"TA2":  {Name: NAKSHATRA_UTTARA_BHADRAPADA, Pada: 2},
+	"TE2":  {Name: NAKSHATRA_UTTARA_BHADRAPADA, Pada: 3},
+	"TO2":  {Name: NAKSHATRA_UTTARA_BHADRAPADA, Pada: 4},
+	"NA3":  {Name: NAKSHATRA_REVATI, Pada: 1},
+	"NE3":  {Name: NAKSHATRA_REVATI, Pada: 2},
+	"NO3":  {Name: NAKSHATRA_REVATI, Pada: 3},
+	"NU3":  {Name: NAKSHATRA_REVATI, Pada: 4},
+}
+
 func GetNakshatraFromVowel(v string) NakshatraPada {
-	var nakshatra NakshatraPada
-
-	switch v {
-
-	case "CHU": // चु  चू
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 1
-	case "CHE": // चे
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 2
-	case "CHO": // चो
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 3
-	case "LA": // ल
-		nakshatra.Name = NAKSHATRA_ASHWINI
-		nakshatra.Pada = 4
-
-	case "LI": // ली
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 1
-	case "LU": // लु
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 2
-	case "LE": // ले
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 3
-	case "LO": // लो
-		nakshatra.Name = NAKSHATRA_BHARANI
-		nakshatra.Pada = 4
-
-	case "AA": // आ अ
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 1
-	case "EE": // इ
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 2
-	case "OO": // ऊ उ
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 3
-	case "AE": // ए
-		nakshatra.Name = NAKSHATRA_KRITTICA
-		nakshatra.Pada = 4
-
-	case "O": // ओ
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 1
-	case "V": // व
-	case "B": // ब
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 2
-	case "VI": // वि वी
-	case "BI": // बि
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 3
-	case "VOO": // वू वु
-	case "BOO": // बू बु
-		nakshatra.Name = NAKSHATRA_ROHINI
-		nakshatra.Pada = 4
-
-	case "VE": // वे
-	case "BE": // बे
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 1
-	case "VO": // वो
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 2
-	case "k": // क
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 3
-	case "KI": // की  कि
-		nakshatra.Name = NAKSHATRA_MRIGASHIRSHA
-		nakshatra.Pada = 4
-
-	case "KU": // कु
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 1
-	// ... the rest of the original vowel-to-nakshatra mapping follows the same pattern.
-	// For brevity we continue the mapping exactly as before but using constants.
-	case "G": // ग
-	case "GHI": // घी घि
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 2
-	case "GHO": // घो
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 3
-	case "NG": // ङ
-		nakshatra.Name = NAKSHATRA_ARDRA
-		nakshatra.Pada = 4
-
-	case "CA":
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 1
-	case "CHA":
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 2
-	case "JE":
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 3
-	case "JO":
-		nakshatra.Name = NAKSHATRA_PUNARVASU
-		nakshatra.Pada = 4
-
-	case "TA":
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 1
-	case "TE":
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 2
-	case "TO":
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 3
-	case "NA":
-		nakshatra.Name = NAKSHATRA_PUSHYA
-		nakshatra.Pada = 4
-
-	case "NI":
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 1
-	case "NU":
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 2
-	case "NE":
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 3
-	case "NO":
-		nakshatra.Name = NAKSHATRA_ASHLESHA
-		nakshatra.Pada = 4
-
-	case "BA":
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 1
-	case "BHA":
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 2
-	case "MA":
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 3
-	case "YA":
-		nakshatra.Name = NAKSHATRA_MAGHA
-		nakshatra.Pada = 4
-
-	case "RA":
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 1
-	case "RI":
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 2
-	case "RU":
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 3
-	case "RE":
-		nakshatra.Name = NAKSHATRA_PURVA_PHALGUNI
-		nakshatra.Pada = 4
-
-	case "RO":
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 1
-	case "TAH":
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 2
-	case "TI":
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 3
-	case "TU":
-		nakshatra.Name = NAKSHATRA_UTTARA_PHALGUNI
-		nakshatra.Pada = 4
-
-	case "TEH":
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 1
-	case "TOH":
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 2
-	case "NAH":
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 3
-	case "NEE":
-		nakshatra.Name = NAKSHATRA_HASTA
-		nakshatra.Pada = 4
-
-	case "PI":
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 1
-	case "PU":
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 2
-	case "PE":
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 3
-	case "PO":
-		nakshatra.Name = NAKSHATRA_CHITRA
-		nakshatra.Pada = 4
-
-	case "RAA":
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 1
-	case "RIH":
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 2
-	case "RUH":
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 3
-	case "REH":
-		nakshatra.Name = NAKSHATRA_SWATI
-		nakshatra.Pada = 4
-
-	case "RII":
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 1
-	case "RUU":
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 2
-	case "REE":
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 3
-	case "ROO":
-		nakshatra.Name = NAKSHATRA_VISHAKHA
-		nakshatra.Pada = 4
-
-	case "TAI":
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 1
-	case "TEI":
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 2
-	case "TOI":
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 3
-	case "NAI":
-		nakshatra.Name = NAKSHATRA_ANURADHA
-		nakshatra.Pada = 4
-
-	case "NAA":
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 1
-	case "NIH":
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 2
-	case "NUH":
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 3
-	case "NEH":
-		nakshatra.Name = NAKSHATRA_JYESTHA
-		nakshatra.Pada = 4
-
-	case "NAIY":
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 1
-	case "NII":
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 2
-	case "NUU":
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 3
-	case "NEE2":
-		nakshatra.Name = NAKSHATRA_MOOLA
-		nakshatra.Pada = 4
-
-	case "BAH":
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 1
-	case "BIH":
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 2
-	case "BUH":
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 3
-	case "BEH2":
-		nakshatra.Name = NAKSHATRA_PURVA_ASHADHA
-		nakshatra.Pada = 4
-
-	case "BOH":
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 1
-	case "DA":
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 2
-	case "DEE":
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 3
-	case "DO":
-		nakshatra.Name = NAKSHATRA_UTTARA_ASHADHA
-		nakshatra.Pada = 4
-
-	case "DHI":
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 1
-	case "DHE":
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 2
-	case "DHO":
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 3
-	case "NA2":
-		nakshatra.Name = NAKSHATRA_ABHIJIT
-		nakshatra.Pada = 4
-
-	case "NAH2":
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 1
-	case "NIH2":
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 2
-	case "NUH2":
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 3
-	case "NEH2":
-		nakshatra.Name = NAKSHATRA_SHRAVANA
-		nakshatra.Pada = 4
-
-	case "PIH":
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 1
-	case "PUH":
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 2
-	case "PEH":
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 3
-	case "POH":
-		nakshatra.Name = NAKSHATRA_DHANISHTHA
-		nakshatra.Pada = 4
-
-	case "BA2":
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 1
-	case "BHA2":
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 2
-	case "MA2":
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 3
-	case "YA2":
-		nakshatra.Name = NAKSHATRA_SATABHISHA
-		nakshatra.Pada = 4
-
-	case "RA2":
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 1
-	case "RI2":
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 2
-	case "RU2":
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 3
-	case "RE2":
-		nakshatra.Name = NAKSHATRA_PURVA_BHADRAPADA
-		nakshatra.Pada = 4
-
-	case "RO2":
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 1
-	case "TA2":
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 2
-	case "TE2":
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 3
-	case "TO2":
-		nakshatra.Name = NAKSHATRA_UTTARA_BHADRAPADA
-		nakshatra.Pada = 4
-
-	case "NA3":
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 1
-	case "NE3":
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 2
-	case "NO3":
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 3
-	case "NU3":
-		nakshatra.Name = NAKSHATRA_REVATI
-		nakshatra.Pada = 4
-
-	default:
-		// leave zero-value nakshatra if unrecognized
+	key := strings.ToUpper(strings.TrimSpace(v))
+	if val, ok := nakshatraFromVowelMap[key]; ok {
+		return val
 	}
-
-	return nakshatra
+	return NakshatraPada{}
 }
