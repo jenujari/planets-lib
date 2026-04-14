@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# Pre-commit git hook to run golangci-lint and abort the commit if issues are found.
+#
+# To enable these repository hooks for your local clone, run:
+#   git config core.hooksPath .githooks
+#
+# Behavior:
+# - Runs `golangci-lint run ./...` from repository root.
+# - If the linter binary is not installed, prints installation hints and aborts the commit.
+# - You can bypass the hook locally by setting the environment variable:
+#     GOLANGCI_LINT_SKIP=1
+#
+# Notes:
+# - Running the linter on large repositories can take time. If you prefer to lint only
+#   staged files or a subset, adjust the invocation below.
+# - This hook intentionally fails fast to keep the codebase lint-clean.
+#
+
+set -e
+
+# Resolve repo root and switch to it so the hook behaves consistently.
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [ -z "$REPO_ROOT" ]; then
+  # Not in a git repo or unable to determine root — don't block commit in that case.
+  exit 0
+fi
+cd "$REPO_ROOT" || exit 0
+
+# Allow local bypass for convenience (CI will still run the linter).
+if [ "${GOLANGCI_LINT_SKIP:-}" = "1" ]; then
+  echo "Skipping golangci-lint because GOLANGCI_LINT_SKIP=1"
+  exit 0
+fi
+
+# Prefer the golangci-lint binary on PATH.
+if command -v golangci-lint >/dev/null 2>&1; then
+  echo "Running golangci-lint run ./... (this may take a while)..."
+  if ! golangci-lint run ./...; then
+    echo ""
+    echo "golangci-lint reported issues. Aborting commit."
+    echo "Run 'golangci-lint run ./...' locally to see and fix the reported issues."
+    echo "If you need to bypass this hook temporarily, set GOLANGCI_LINT_SKIP=1."
+    exit 1
+  fi
+  echo "golangci-lint passed."
+  exit 0
+fi
+
+# Fallback: binary not found — print helpful instructions and abort.
+cat <<'EOF'
+golangci-lint is not installed or not in PATH.
+This repository enforces linting before commits. Install golangci-lint and try again.
+
+Install examples:
+
+  # Install via the project's install script (Linux / macOS)
+  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.59.0
+
+  # Or install with 'go install' (make sure GOPATH/bin or GOBIN is in your PATH)
+  go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0
+
+To bypass this check locally (not recommended), set:
+  export GOLANGCI_LINT_SKIP=1
+
+EOF
+
+exit 1
