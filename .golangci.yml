@@ -1,0 +1,121 @@
+# golangci-lint configuration for planets-lib
+# Curated set of linters and sensible defaults for a small Go library module.
+#
+# Notes:
+# - This config aims to be strict but practical: it enables key linters while
+#   avoiding overly noisy checks on test files and examples.
+# - To tune rules further, add a .golangci.yml at repo root (this file).
+#
+run:
+  timeout: 5m
+  tests: true         # run linters against test files as well (we selectively relax some linters for tests)
+  concurrency: 4
+
+# Linters to enable/disable
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - gosimple
+    - unused
+    - deadcode
+    - structcheck
+    - varcheck
+    - gofmt
+    - revive
+    - gocyclo
+    - gosec
+    - goimports
+
+  # dupl is noisy for small projects; enable later if desired
+  disable:
+    - dupl
+
+# Per-linter settings
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+
+  gofmt:
+    simplify: true
+
+  revive:
+    # Use revive default rules; feel free to add a custom revive.toml later.
+    severity: warning
+
+  errcheck:
+    # Check type assertions and conversions as well
+    check-type-assertions: true
+    check-blank: true
+    # Common functions where ignoring the error is acceptable are left to developer judgement.
+    # For example, tests may intentionally ignore errors; see exclude-rules below.
+
+  gosec:
+    # Minimal configuration; treat security warnings as failures by default.
+    # Exclude test-specific rules if they are noisy.
+    exclude-rules:
+      # Allow certain patterns in tests (example)
+      - path: "_test\\.go"
+        rules:
+          - G104  # ignore potential unhandled errors in defer for tests (if any)
+
+  goimports:
+    local-prefixes: "github.com/jenujari/planets-lib"
+
+# Files and directories to skip entirely
+skip-dirs:
+  - "vendor"
+  - "third_party"
+  - ".git"
+  - "node_modules"
+
+skip-files:
+  - ".*\\.gen\\.go$"
+  - ".*\\.pb\\.go$"
+  - ".*_mock\\.go$"
+
+# Per-path/per-linter relaxations and exclusions
+exclude-rules:
+  # Allow some leniency in test files for errcheck and gocyclo
+  - path: "_test\\.go$"
+    linters:
+      - errcheck
+      - gocyclo
+
+  # Examples exist under examples/; let them be slightly more permissive
+  - path: "^examples/.*"
+    linters:
+      - gocyclo
+      - gofmt
+
+  # Common generated code / tool outputs (conservative)
+  - path: ".*\\.gen\\.go$"
+    linters:
+      - revive
+      - gosimple
+      - staticcheck
+
+  # Allow missing top-level comments on small functions and tests
+  - linters:
+      - revive
+    text: "should have comment"
+
+# Global textual excludes for issues (regex patterns)
+exclude:
+  # Allow certain patterns that are not helpful for this repo
+  - "error return value not checked.*(Close|Write|Fprintf).*"
+  - "cyclomatic complexity .*"
+  - "should have comment.*"
+
+# Control output verbosity and limits
+issues:
+  # 0 means no limit (but we still fail on any issue unless excluded)
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  # If you want to require a zero-lint baseline, set new issues to error
+  # new: false
+
+# Optional: enable linters by default on CI but allow developers to skip locally
+# Developers can bypass locally by setting GOLANGCI_LINT_SKIP=1 (pre-commit hook supports it)
