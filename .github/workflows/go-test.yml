@@ -43,6 +43,17 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Install golangci-lint
+        # Install golangci-lint binary to /usr/local/bin for the runner
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.59.0
+
+      - name: Run golangci-lint
+        # Run the linter and fail the job if issues are found.
+        run: |
+          # Adjust flags as needed; disable or enable linters via .golangci.yml in repo
+          golangci-lint run ./...
+
       - name: Run tests
         env:
           # ensure modules mode and consistent output
