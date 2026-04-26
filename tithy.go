@@ -59,18 +59,10 @@ func CalcTithy(moon, sun float64) int {
 	}
 
 	// Numerical safety: clamp small negative zeros to 0
-	if delta < 0 {
-		delta = 0
-	}
+	delta = max(0, delta)
 
 	tithy := int(math.Floor(delta/degreesPerTithy)) + 1
 
 	// Ensure result is within the expected 1..30 range.
-	if tithy < 1 {
-		return 1
-	}
-	if tithy > maxTithy {
-		return maxTithy
-	}
-	return tithy
+	return max(1, min(tithy, maxTithy))
 }

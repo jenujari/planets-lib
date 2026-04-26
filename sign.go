@@ -61,12 +61,7 @@ func GetSignFrmDegree(d float64) string {
 	signIndex := int(nd / 30.0)
 
 	// Defensive clamping to ensure index is always valid.
-	if signIndex < 0 {
-		signIndex = 0
-	}
-	if signIndex >= len(SIGNS) {
-		signIndex = len(SIGNS) - 1
-	}
+	signIndex = max(0, min(signIndex, len(SIGNS)-1))
 
 	return SIGNS[signIndex]
 }

@@ -102,9 +102,7 @@ func CalcUdayBal(sun_long, pl_long, pl_speed float64, pl_name string) float64 {
 	pl_uday := per_deg * out_of_ast
 
 	// Cap at MaxRetrunValue
-	if pl_uday > MaxRetrunValue {
-		pl_uday = MaxRetrunValue
-	}
+	pl_uday = min(pl_uday, MaxRetrunValue)
 
 	return pl_uday
 }

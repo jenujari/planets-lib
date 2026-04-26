@@ -52,9 +52,7 @@ func (d *DMS) ParseFromDegree(degree float64) {
 	}
 
 	// Clamp to non-negative values (sign is stored in IsNegative)
-	if seconds < 0 {
-		seconds = 0
-	}
+	seconds = max(0, seconds)
 
 	d.S = float32(seconds)
 }
