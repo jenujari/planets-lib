@@ -40,6 +40,23 @@ func main() {
 	fmt.Printf("  IsRetro: %v\n", p.IsRetro)
 	fmt.Printf("  Longitude DMS: %s\n\n", p.LongitudeDMS.String())
 
+	// Example 6: Calculate Uchch Bala (exaltation strength)
+	plName := baselib.JUPITER
+	plLong := 95.0 // Exaltation point for Jupiter
+	uchhBal := baselib.CalcUchhBal(plLong, plName)
+	fmt.Printf("Example: CalcUchhBal\n  Planet: %s, Longitude: %.2f° -> Uchch Bala: %.2f\n\n", plName, plLong, uchhBal)
+
+	// Example 7: Calculate Navansh Rashi
+	navRashiNum, navRashiName := baselib.CalcNavanshRashi(plLong)
+	fmt.Printf("Example: CalcNavanshRashi\n  Longitude: %.2f° -> Navansh Rashi: %s (%d)\n\n", plLong, navRashiName, navRashiNum)
+
+	// Example 8: Calculate Udaybal (combustion/rising strength)
+	sunLong := 10.0
+	marsLong := 40.0
+	marsSpeed := 0.5
+	udayBal := baselib.CalcUdayBal(sunLong, marsLong, marsSpeed, baselib.MARS)
+	fmt.Printf("Example: CalcUdayBal\n  Sun: %.2f°, Mars: %.2f°, Speed: %.2f -> Udaybal: %.2f\n\n", sunLong, marsLong, marsSpeed, udayBal)
+
 	// Example 5: Handling invalid inputs (NaN / Inf)
 	invalid := math.NaN()
 	fmt.Printf("Example: Invalid inputs\n")
