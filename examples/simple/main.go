@@ -62,6 +62,12 @@ func main() {
 	vakraBal := baselib.CalcVakraBal(retroMarsSpeed, baselib.MARS)
 	fmt.Printf("Example: CalcVakraBal\n  Planet: %s, Speed: %.2f -> Vakra Bal: %.2f\n\n", baselib.MARS, retroMarsSpeed, vakraBal)
 
+	// Example 10: Get Graha Maitri (Planetary Relationship)
+	base := baselib.SUN
+	target := baselib.SATURN
+	rel, _ := baselib.GetGrahaMaitri(base, target)
+	fmt.Printf("Example: GetGrahaMaitri\n  Relationship from %s to %s is %s\n\n", base, target, rel)
+
 	// Example 5: Handling invalid inputs (NaN / Inf)
 	invalid := math.NaN()
 	fmt.Printf("Example: Invalid inputs\n")
