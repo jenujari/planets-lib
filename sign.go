@@ -55,7 +55,7 @@ func GetSignFrmDegree(d float64) string {
 
 	// Normalize to [0,360) using shared helper. This handles negative angles
 	// and large values consistently with other functions in the package.
-	nd := normalizeAngle(d)
+	nd := NormalizeAngle(d)
 
 	// Each zodiac sign spans 30 degrees.
 	signIndex := int(nd / 30.0)

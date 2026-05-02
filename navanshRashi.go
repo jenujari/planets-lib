@@ -4,7 +4,7 @@ package baselib
 // It returns the 1-indexed rashi number (1..12) and its name.
 func CalcNavanshRashi(pl_long float64) (int, string) {
 	// Normalize longitude to [0, 360)
-	lon := normalizeAngle(pl_long)
+	lon := NormalizeAngle(pl_long)
 
 	// Determine the base sign (0..11)
 	rashiIdx := int(lon / 30.0)

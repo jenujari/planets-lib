@@ -5,6 +5,7 @@ import (
 	"math"
 
 	baselib "github.com/jenujari/planets-lib"
+	"github.com/jenujari/planets-lib/bal"
 )
 
 func main() {
@@ -43,8 +44,8 @@ func main() {
 	// Example 6: Calculate Uchch Bala (exaltation strength)
 	plName := baselib.JUPITER
 	plLong := 95.0 // Exaltation point for Jupiter
-	uchhBal := baselib.CalcUchhBal(plLong, plName)
-	fmt.Printf("Example: CalcUchhBal\n  Planet: %s, Longitude: %.2f° -> Uchch Bala: %.2f\n\n", plName, plLong, uchhBal)
+	uchhBal := bal.UchhBal(plLong, plName)
+	fmt.Printf("Example: UchhBal\n  Planet: %s, Longitude: %.2f° -> Uchch Bala: %.2f\n\n", plName, plLong, uchhBal)
 
 	// Example 7: Calculate Navansh Rashi
 	navRashiNum, navRashiName := baselib.CalcNavanshRashi(plLong)
@@ -54,13 +55,13 @@ func main() {
 	sunLong := 10.0
 	marsLong := 40.0
 	marsSpeed := 0.5
-	udayBal := baselib.CalcUdayBal(sunLong, marsLong, marsSpeed, baselib.MARS)
-	fmt.Printf("Example: CalcUdayBal\n  Sun: %.2f°, Mars: %.2f°, Speed: %.2f -> Udaybal: %.2f\n\n", sunLong, marsLong, marsSpeed, udayBal)
+	udayBal := bal.UdayBal(sunLong, marsLong, marsSpeed, baselib.MARS)
+	fmt.Printf("Example: UdayBal\n  Sun: %.2f°, Mars: %.2f°, Speed: %.2f -> Udaybal: %.2f\n\n", sunLong, marsLong, marsSpeed, udayBal)
 
 	// Example 9: Calculate Vakra Bal (retrograde strength)
 	retroMarsSpeed := -0.4
-	vakraBal := baselib.CalcVakraBal(retroMarsSpeed, baselib.MARS)
-	fmt.Printf("Example: CalcVakraBal\n  Planet: %s, Speed: %.2f -> Vakra Bal: %.2f\n\n", baselib.MARS, retroMarsSpeed, vakraBal)
+	vakraBal := bal.VakraBal(retroMarsSpeed, baselib.MARS)
+	fmt.Printf("Example: VakraBal\n  Planet: %s, Speed: %.2f -> Vakra Bal: %.2f\n\n", baselib.MARS, retroMarsSpeed, vakraBal)
 
 	// Example 10: Get Graha Maitri (Planetary Relationship)
 	base := baselib.SUN
@@ -69,7 +70,7 @@ func main() {
 	fmt.Printf("Example: GetGrahaMaitri\n  Relationship from %s to %s is %s\n\n", base, target, rel)
 
 	// Example 11: Calculate Kshetra Bal (positional strength)
-	ksBal, _ := baselib.KshetraBal(127.5, baselib.SUN) // 7.5° into Leo
+	ksBal, _ := bal.KshetraBal(127.5, baselib.SUN) // 7.5° into Leo
 	fmt.Printf("Example: KshetraBal\n  Sun at 127.5° (Leo) -> Kshetra Bal: %.2f\n\n", ksBal)
 
 	// Example 5: Handling invalid inputs (NaN / Inf)

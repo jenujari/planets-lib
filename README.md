@@ -13,7 +13,7 @@ This repository is intentionally small and flat — production code lives at the
 
 ## Highlights / Design decisions
 
-- Angle normalization is centralized via `normalizeAngle` to consistently map arbitrary angles into `[0, 360)`.
+- Angle normalization is centralized via `NormalizeAngle` to consistently map arbitrary angles into `[0, 360)`.
 - Functions are defensive about invalid floats: NaN and ±Inf inputs are handled predictably instead of panicking.
   - `CalcTithy` returns `0` for invalid inputs.
   - `GetSignFrmDegree` returns an empty string for invalid inputs.
@@ -81,7 +81,7 @@ This ensures pull requests (and pushes) run the test suite; merges to `main` can
 
 ## Files of interest
 
-- `tithy.go` — tithy calculation and `normalizeAngle`.
+- `tithy.go` — tithy calculation and `NormalizeAngle`.
 - `sign.go` — sign names and `GetSignFrmDegree`.
 - `nakshatra.go` — nakshatra/pada mapping and vowel-based mapping helper.
 - `planet.go` — `PlanetCord` struct and `CalculateDerivedValues`.

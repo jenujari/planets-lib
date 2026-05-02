@@ -1,12 +1,13 @@
-package baselib
+package bal
 
 import (
 	"testing"
 
+	baselib "github.com/jenujari/planets-lib"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCalcUdayBal(t *testing.T) {
+func TestUdayBal(t *testing.T) {
 	tests := []struct {
 		name     string
 		sunLong  float64
@@ -20,7 +21,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  10,
 			plLong:   20,
 			plSpeed:  1,
-			plName:   SUN,
+			plName:   baselib.SUN,
 			expected: 100,
 		},
 		{
@@ -28,7 +29,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  10,
 			plLong:   20,
 			plSpeed:  -0.05,
-			plName:   RAHU,
+			plName:   baselib.RAHU,
 			expected: 0,
 		},
 		{
@@ -36,7 +37,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  10,
 			plLong:   20,
 			plSpeed:  -0.05,
-			plName:   KETU,
+			plName:   baselib.KETU,
 			expected: 0,
 		},
 		{
@@ -44,7 +45,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   12,
 			plSpeed:  13,
-			plName:   MOON,
+			plName:   baselib.MOON,
 			expected: 0,
 		},
 		{
@@ -52,7 +53,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   96, // 12 + (180-12)/2 = 12 + 84 = 96
 			plSpeed:  13,
-			plName:   MOON,
+			plName:   baselib.MOON,
 			expected: 50,
 		},
 		{
@@ -60,7 +61,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   180,
 			plSpeed:  13,
-			plName:   MOON,
+			plName:   baselib.MOON,
 			expected: 100,
 		},
 		{
@@ -68,7 +69,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   17,
 			plSpeed:  0.5,
-			plName:   MARS,
+			plName:   baselib.MARS,
 			expected: 0,
 		},
 		{
@@ -76,7 +77,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   180,
 			plSpeed:  0.5,
-			plName:   MARS,
+			plName:   baselib.MARS,
 			expected: 100,
 		},
 		{
@@ -84,7 +85,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   11,
 			plSpeed:  0.1,
-			plName:   JUPITER,
+			plName:   baselib.JUPITER,
 			expected: 0,
 		},
 		{
@@ -92,7 +93,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   180,
 			plSpeed:  0.1,
-			plName:   JUPITER,
+			plName:   baselib.JUPITER,
 			expected: 100,
 		},
 		{
@@ -100,7 +101,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   14,
 			plSpeed:  1.5,
-			plName:   MERCURY,
+			plName:   baselib.MERCURY,
 			expected: 0,
 		},
 		{
@@ -108,7 +109,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   27,
 			plSpeed:  1.5,
-			plName:   MERCURY,
+			plName:   baselib.MERCURY,
 			expected: 100,
 		},
 		{
@@ -116,7 +117,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   12,
 			plSpeed:  -0.5,
-			plName:   MERCURY,
+			plName:   baselib.MERCURY,
 			expected: 0,
 		},
 		{
@@ -124,7 +125,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   27,
 			plSpeed:  -0.5,
-			plName:   MERCURY,
+			plName:   baselib.MERCURY,
 			expected: 100,
 		},
 		{
@@ -132,7 +133,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   10,
 			plSpeed:  1.2,
-			plName:   VENUS,
+			plName:   baselib.VENUS,
 			expected: 0,
 		},
 		{
@@ -140,7 +141,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   47,
 			plSpeed:  1.2,
-			plName:   VENUS,
+			plName:   baselib.VENUS,
 			expected: 100,
 		},
 		{
@@ -148,7 +149,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   8,
 			plSpeed:  -0.4,
-			plName:   VENUS,
+			plName:   baselib.VENUS,
 			expected: 0,
 		},
 		{
@@ -156,7 +157,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  0,
 			plLong:   47,
 			plSpeed:  -0.4,
-			plName:   VENUS,
+			plName:   baselib.VENUS,
 			expected: 100,
 		},
 		{
@@ -164,7 +165,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  355,
 			plLong:   5,
 			plSpeed:  1.5,
-			plName:   MERCURY,
+			plName:   baselib.MERCURY,
 			expected: 0, // distance is 10, which is <= 14
 		},
 		{
@@ -172,7 +173,7 @@ func TestCalcUdayBal(t *testing.T) {
 			sunLong:  355,
 			plLong:   20,
 			plSpeed:  1.5,
-			plName:   MERCURY,
+			plName:   baselib.MERCURY,
 			expected: 100, // distance is 25, which is > 14 and > (27-14)? Wait.
 			// distance = 25. pl_ast = 14. max_diff = 27.
 			// availabe_range = 13. out_of_ast = 11.
@@ -183,7 +184,7 @@ func TestCalcUdayBal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := CalcUdayBal(tt.sunLong, tt.plLong, tt.plSpeed, tt.plName)
+			result := UdayBal(tt.sunLong, tt.plLong, tt.plSpeed, tt.plName)
 			if tt.name == "Shortest distance wrap around 360 (Mercury 2)" {
 				// (100.0 / (27 - 14)) * (25 - 14) = (100/13)*11 = 84.61538461538461
 				assert.InDelta(t, 84.61538461538461, result, 0.0001)
@@ -194,10 +195,10 @@ func TestCalcUdayBal(t *testing.T) {
 	}
 }
 
-func BenchmarkCalcUdayBal(b *testing.B) {
+func BenchmarkUdayBal(b *testing.B) {
 	var result float64
 	for b.Loop() {
-		result = CalcUdayBal(0, 45, 1.2, VENUS)
+		result = UdayBal(0, 45, 1.2, baselib.VENUS)
 	}
 	test_bal = result
 }

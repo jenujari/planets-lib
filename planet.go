@@ -186,7 +186,7 @@ func (p *PlanetCord) CalculateDerivedValues() {
 		p.Sign = ""
 		p.Nakshatra = NakshatraPada{}
 	} else {
-		normLon := normalizeAngle(p.Longitude)
+		normLon := NormalizeAngle(p.Longitude)
 		// The helper functions will also defensively handle edge cases if necessary.
 		p.Sign = GetSignFrmDegree(normLon)
 		p.Nakshatra = GetNakshatraPadaFromDegree(normLon)

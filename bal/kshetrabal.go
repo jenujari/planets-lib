@@ -1,6 +1,8 @@
-package baselib
+package bal
 
 import (
+	"github.com/jenujari/planets-lib"
+
 	"math"
 )
 
@@ -10,20 +12,20 @@ import (
 //
 // Parameters:
 //   - pl_long: The longitude of the planet in degrees.
-//   - pl_name: The name of the planet (e.g., SUN, MARS).
+//   - pl_name: The name of the planet (e.g., baselib.SUN, baselib.MARS).
 //
 // Returns:
 //   - The calculated Kshetra Bal value (0 to 100).
 //   - An error if the planet or its relationship is not found.
 func KshetraBal(pl_long float64, pl_name string) (float64, error) {
 	// 1. Determine the sign based on pl_long
-	sign := GetSignFrmDegree(pl_long)
+	sign := baselib.GetSignFrmDegree(pl_long)
 
 	// 2. Get the lord (swami) of that sign
-	pl_swami := GetSignLord(sign)
+	pl_swami := baselib.GetSignLord(sign)
 
 	// 3. Determine the relationship between pl_name and pl_swami
-	pl_rel, err := GetGrahaMaitri(pl_name, pl_swami)
+	pl_rel, err := baselib.GetGrahaMaitri(pl_name, pl_swami)
 	if err != nil {
 		return 0, err
 	}
@@ -31,22 +33,22 @@ func KshetraBal(pl_long float64, pl_name string) (float64, error) {
 	// 4. Determine inc_factor based on pl_rel
 	var inc_factor float64
 	switch pl_rel {
-	case SELF:
+	case baselib.SELF:
 		inc_factor = 4
-	case FRIEND:
+	case baselib.FRIEND:
 		inc_factor = 3
-	case NEUTRAL:
+	case baselib.NEUTRAL:
 		inc_factor = 2
-	case ENEMY:
+	case baselib.ENEMY:
 		inc_factor = 1
 	default:
 		inc_factor = 2 // Default to neutral if somehow undefined
 	}
 
 	// 5. Get remaining degrees in current sign
-	normLon := normalizeAngle(pl_long)
+	normLon := baselib.NormalizeAngle(pl_long)
 	rem := math.Mod(normLon, 30.0)
-	dms := NewDMS(rem)
+	dms := baselib.NewDMS(rem)
 
 	// 6. Check low_bound (midpoint is 15°)
 	low_bound := rem <= 15.0

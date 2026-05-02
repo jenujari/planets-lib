@@ -293,7 +293,7 @@ func GetNakshatraPadaFromDegree(d float64) NakshatraPada {
 		return nakshatra
 	}
 
-	nd := normalizeAngle(d)
+	nd := NormalizeAngle(d)
 
 	// Find the first matching range (ranges are half-open [start, end))
 	for _, r := range nakshatraRanges {

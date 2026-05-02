@@ -7,9 +7,9 @@ const (
 	maxTithy        = 30
 )
 
-// normalizeAngle returns an angle normalized into the range [0, 360).
+// NormalizeAngle returns an angle normalized into the range [0, 360).
 // If the input is NaN or infinite, it returns NaN.
-func normalizeAngle(angle float64) float64 {
+func NormalizeAngle(angle float64) float64 {
 	if math.IsNaN(angle) || math.IsInf(angle, 0) {
 		return math.NaN()
 	}
@@ -43,8 +43,8 @@ func CalcTithy(moon, sun float64) int {
 		return 0
 	}
 
-	moonLon := normalizeAngle(moon)
-	sunLon := normalizeAngle(sun)
+	moonLon := NormalizeAngle(moon)
+	sunLon := NormalizeAngle(sun)
 
 	// If normalization produced NaN (shouldn't happen because we checked),
 	// return 0 as an invalid signal.
