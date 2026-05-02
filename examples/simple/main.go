@@ -73,6 +73,10 @@ func main() {
 	ksBal, _ := bal.KshetraBal(127.5, baselib.SUN) // 7.5° into Leo
 	fmt.Printf("Example: KshetraBal\n  Sun at 127.5° (Leo) -> Kshetra Bal: %.2f\n\n", ksBal)
 
+	// Example 12: Calculate Navansh Bal (Navamsha positional strength)
+	navBal, _ := bal.NavanshBal(1.666666, baselib.MARS) // Aries Navamsha Midpoint
+	fmt.Printf("Example: NavanshBal\n  Mars in Aries Navamsha Midpoint -> Navansh Bal: %.2f%%\n\n", navBal)
+
 	// Example 5: Handling invalid inputs (NaN / Inf)
 	invalid := math.NaN()
 	fmt.Printf("Example: Invalid inputs\n")
