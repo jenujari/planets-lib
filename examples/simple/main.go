@@ -57,6 +57,11 @@ func main() {
 	udayBal := baselib.CalcUdayBal(sunLong, marsLong, marsSpeed, baselib.MARS)
 	fmt.Printf("Example: CalcUdayBal\n  Sun: %.2f°, Mars: %.2f°, Speed: %.2f -> Udaybal: %.2f\n\n", sunLong, marsLong, marsSpeed, udayBal)
 
+	// Example 9: Calculate Vakra Bal (retrograde strength)
+	retroMarsSpeed := -0.4
+	vakraBal := baselib.CalcVakraBal(retroMarsSpeed, baselib.MARS)
+	fmt.Printf("Example: CalcVakraBal\n  Planet: %s, Speed: %.2f -> Vakra Bal: %.2f\n\n", baselib.MARS, retroMarsSpeed, vakraBal)
+
 	// Example 5: Handling invalid inputs (NaN / Inf)
 	invalid := math.NaN()
 	fmt.Printf("Example: Invalid inputs\n")
