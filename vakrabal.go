@@ -32,15 +32,15 @@ func CalcVakraBal(pl_speed float64, pl_name string) float64 {
 	var maxRetroSpeed float64
 	switch pl_name {
 	case MARS:
-		maxRetroSpeed = 0.8
+		maxRetroSpeed = 0.436666
 	case MERCURY:
-		maxRetroSpeed = 1.6
+		maxRetroSpeed = 1.5
 	case JUPITER:
-		maxRetroSpeed = 0.35
+		maxRetroSpeed = 0.136666
 	case VENUS:
-		maxRetroSpeed = 0.8
+		maxRetroSpeed = 0.686666
 	case SATURN:
-		maxRetroSpeed = 0.25
+		maxRetroSpeed = 0.0833333
 	default:
 		// Fallback for other planets or unknown names
 		return MinReturnValue

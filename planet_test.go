@@ -62,13 +62,13 @@ func TestPlanetSpeedCategory_BoundariesAndEdges(t *testing.T) {
 	})
 
 	t.Run("Mars retro boundaries and positive", func(t *testing.T) {
-		// retro KUTIL exact
-		cat, err := PlanetSpeedCategory(MARS, -0.3342593)
+		// retro KUTIL exact (threshold is -0.3638889)
+		cat, err := PlanetSpeedCategory(MARS, -0.3638889)
 		assert.NoError(t, err)
 		assert.Equal(t, KUTIL, cat)
 
-		// retro ATI_VAKRA exact
-		cat, err = PlanetSpeedCategory(MARS, -0.2674074)
+		// retro ATI_VAKRA exact (threshold is -0.2911111)
+		cat, err = PlanetSpeedCategory(MARS, -0.2911111)
 		assert.NoError(t, err)
 		assert.Equal(t, ATI_VAKRA, cat)
 
@@ -88,7 +88,8 @@ func TestPlanetSpeedCategory_BoundariesAndEdges(t *testing.T) {
 	})
 
 	t.Run("Mercury and Jupiter retro mapping and extremes", func(t *testing.T) {
-		cat, err := PlanetSpeedCategory(MERCURY, -1.1550926)
+		// Mercury retro KUTIL exact (threshold is -1.25)
+		cat, err := PlanetSpeedCategory(MERCURY, -1.25)
 		assert.NoError(t, err)
 		assert.Equal(t, KUTIL, cat)
 

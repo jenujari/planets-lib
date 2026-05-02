@@ -222,9 +222,9 @@ func PlanetSpeedCategory(planet string, speed float64) (string, error) {
 		// Mars: has retro thresholds and positive thresholds
 		if speed < 0 {
 			return classifyNeg(speed,
-				-0.3342593, // kutil
-				-0.2674074, // ati-vakra
-				// -0.2005556, // vakra (upper bound for vakra is less negative)
+				-0.3638889, // kutil
+				-0.2911111, // ati-vakra
+				// -0.2183333, // vakra (upper bound for vakra is less negative)
 			)
 		}
 		return classifyPos(speed,
@@ -239,9 +239,9 @@ func PlanetSpeedCategory(planet string, speed float64) (string, error) {
 	case MERCURY:
 		if speed < 0 {
 			return classifyNeg(speed,
-				-1.1550926,
-				-0.9240741,
-				// -0.6930556,
+				-1.25,
+				-1,
+				// -0.75,
 			)
 		}
 		return classifyPos(speed,
@@ -273,9 +273,9 @@ func PlanetSpeedCategory(planet string, speed float64) (string, error) {
 	case VENUS:
 		if speed < 0 {
 			return classifyNeg(speed,
-				-0.5273148,
-				-0.4218519,
-				// -0.3163889,
+				-0.5722222,
+				-0.4577778,
+				// -0.3433333,
 			)
 		}
 		return classifyPos(speed,
@@ -290,9 +290,9 @@ func PlanetSpeedCategory(planet string, speed float64) (string, error) {
 	case SATURN:
 		if speed < 0 {
 			return classifyNeg(speed,
-				-0.0689815,
-				-0.0551852,
-				// -0.0413889,
+				-0.0694444,
+				-0.0555556,
+				// -0.0416667,
 			)
 		}
 		return classifyPos(speed,
