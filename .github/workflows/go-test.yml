@@ -32,6 +32,11 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          go test ./... -v
+          go test ./... -v -coverprofile=coverage.out
+          go tool cover -func=coverage.out
+
+      - name: Run benchmarks
+        run: |
+          go test ./... -bench=. -run=^$ -benchmem
