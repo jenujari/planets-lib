@@ -8,7 +8,12 @@ on:
   pull_request:
     branches:
       - main
-
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for running this"
+        required: false
+        default: "Manual trigger"
 permissions:
   contents: read
 
