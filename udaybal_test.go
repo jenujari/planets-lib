@@ -195,7 +195,9 @@ func TestCalcUdayBal(t *testing.T) {
 }
 
 func BenchmarkCalcUdayBal(b *testing.B) {
+	var result float64
 	for b.Loop() {
-		CalcUdayBal(0, 45, 1.2, VENUS)
+		result = CalcUdayBal(0, 45, 1.2, VENUS)
 	}
+	test_bal = result
 }

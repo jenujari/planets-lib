@@ -33,8 +33,12 @@ func TestCalcUchhBal(t *testing.T) {
 	}
 }
 
+var test_bal float64
+
 func BenchmarkCalcUchhBal(b *testing.B) {
+	var result float64
 	for b.Loop() {
-		CalcUchhBal(10, SUN)
+		result = CalcUchhBal(10, SUN)
 	}
+	test_bal = result
 }

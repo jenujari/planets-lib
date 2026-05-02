@@ -68,6 +68,10 @@ func main() {
 	rel, _ := baselib.GetGrahaMaitri(base, target)
 	fmt.Printf("Example: GetGrahaMaitri\n  Relationship from %s to %s is %s\n\n", base, target, rel)
 
+	// Example 11: Calculate Kshetra Bal (positional strength)
+	ksBal, _ := baselib.KshetraBal(127.5, baselib.SUN) // 7.5° into Leo
+	fmt.Printf("Example: KshetraBal\n  Sun at 127.5° (Leo) -> Kshetra Bal: %.2f\n\n", ksBal)
+
 	// Example 5: Handling invalid inputs (NaN / Inf)
 	invalid := math.NaN()
 	fmt.Printf("Example: Invalid inputs\n")

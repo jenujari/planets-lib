@@ -36,12 +36,10 @@ func TestCalcVakraBal(t *testing.T) {
 	}
 }
 
-var benchmarkResult float64
-
 func BenchmarkCalcVakraBal(b *testing.B) {
 	var r float64
 	for b.Loop() {
 		r = CalcVakraBal(-0.4, MARS)
 	}
-	benchmarkResult = r
+	test_bal = r
 }
