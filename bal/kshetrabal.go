@@ -1,7 +1,7 @@
 package bal
 
 import (
-	"github.com/jenujari/planets-lib"
+	base "github.com/jenujari/planets-lib"
 
 	"math"
 )
@@ -19,54 +19,37 @@ import (
 //   - An error if the planet or its relationship is not found.
 func KshetraBal(pl_long float64, pl_name string) (float64, error) {
 	// 1. Determine the sign based on pl_long
-	sign := baselib.GetSignFrmDegree(pl_long)
+	sign := base.GetSignFrmDegree(pl_long)
 
 	// 2. Get the lord (swami) of that sign
-	pl_swami := baselib.GetSignLord(sign)
+	pl_swami := base.GetSignLord(sign)
 
 	// 3. Determine the relationship between pl_name and pl_swami
-	pl_rel, err := baselib.GetGrahaMaitri(pl_name, pl_swami)
+	pl_rel, err := base.GetGrahaMaitri(pl_name, pl_swami)
 	if err != nil {
 		return 0, err
 	}
 
-	// 4. Determine inc_factor based on pl_rel
-	var inc_factor float64
+	var weight float64
 	switch pl_rel {
-	case baselib.SELF:
-		inc_factor = 4
-	case baselib.FRIEND:
-		inc_factor = 3
-	case baselib.NEUTRAL:
-		inc_factor = 2
-	case baselib.ENEMY:
-		inc_factor = 1
+	case base.SELF:
+		weight = WeightSelf
+	case base.FRIEND:
+		weight = WeightFriend
+	case base.NEUTRAL:
+		weight = WeightNeutral
+	case base.ENEMY:
+		weight = WeightEnemy
 	default:
-		inc_factor = 2 // Default to neutral if somehow undefined
+		weight = WeightNeutral // Default fallback
 	}
 
 	// 5. Get remaining degrees in current sign
-	normLon := baselib.NormalizeAngle(pl_long)
-	rem := math.Mod(normLon, 30.0)
-	dms := baselib.NewDMS(rem)
+	normLon := base.NormalizeAngle(pl_long)
+	rem := math.Mod(normLon, 30.0) * 60
 
-	// 6. Check low_bound (midpoint is 15°)
-	low_bound := rem <= 15.0
+	distanceFactor := (900 - math.Abs(900-rem)) / 900
 
-	var final_ksBal float64
-	if low_bound {
-		ksbal := float64(dms.D) * inc_factor
-		deg_ksbal := ksbal * 216000
-		min_ksbal := float64(dms.M) * inc_factor * 3600
-		sec_ksbal := float64(dms.S) * inc_factor * 60
-		final_ksBal = (deg_ksbal + min_ksbal + sec_ksbal) / 216000
-	} else {
-		ksbal := (30.0 - float64(dms.D)) * inc_factor
-		deg_ksbal := ksbal * 216000
-		min_ksbal := float64(dms.M) * inc_factor * 3600
-		sec_ksbal := float64(dms.S) * inc_factor * 60
-		final_ksBal = (deg_ksbal - min_ksbal - sec_ksbal) / 216000
-	}
-
-	return (final_ksBal / 60.0) * 100.0, nil
+	final_ksBal := weight * distanceFactor * 100
+	return final_ksBal, nil
 }
