@@ -6,10 +6,10 @@ import (
 )
 
 type DMS struct {
-	IsNegative bool
-	D          int
-	M          int
-	S          float32
+	IsNegative bool    `json:"is_negative"`
+	D          int     `json:"d"`
+	M          int     `json:"m"`
+	S          float32 `json:"s"`
 }
 
 func NewDMS(degree float64) DMS {

@@ -21,7 +21,7 @@ This repository is organized logically — core production code lives at the mod
   - `CalcTithy` returns `0` for invalid inputs.
   - `GetSignFrmDegree` returns an empty string for invalid inputs.
   - `GetNakshatraPadaFromDegree` returns a zero-value `NakshatraPada` for invalid inputs.
-- `PlanetCord.CalculateDerivedValues()` computes derived fields (DMS, sign, nakshatra, retrograde) defensively and uses normalized longitude for lookups without mutating the stored longitude.
+- `PlanetCord.CalculateDerivedValues()` computes derived fields (DMS, sign, nakshatra, retrograde, speed category, vedha) defensively and uses normalized longitude for lookups without mutating the stored longitude.
 - Unit tests cover normalization, boundary values, and invalid inputs.
 
 ## Quick usage
@@ -36,7 +36,7 @@ This repository is organized logically — core production code lives at the mod
   - Use `GetNakshatraPadaFromDegree(longitude)` — returns `NakshatraPada{Name string, Pada int}` (zero-value if invalid).
 
 - Planet coordinates helper:
-  - Use the `PlanetCord` struct; call `CalculateDerivedValues()` to populate derived fields like `Sign`, `Nakshatra`, DMS fields, and `IsRetro`.
+  - Use the `PlanetCord` struct; call `CalculateDerivedValues()` to populate derived fields like `Sign`, `Nakshatra`, DMS fields, `IsRetro`, `SpeedCategory`, and `Vedha`.
 
 - Calculate planetary strength:
   - Import `"github.com/jenujari/planets-lib/bal"` and call functions like `bal.KshetraBal(plLong, plName)` to evaluate positional strength, returning a normalized score from `0` to `100`.

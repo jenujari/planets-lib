@@ -27,6 +27,7 @@ func main() {
 	// Example 4: PlanetCord usage and derived values
 	// Note: longitude can be unnormalized (e.g., >360), CalculateDerivedValues will use normalized angle for lookups.
 	p := &baselib.PlanetCord{
+		Name:      baselib.MARS,
 		Longitude: 721.5,  // will normalize to 1.5°
 		Latitude:  -1.234, // example latitude
 		SpeedLong: -0.512, // retrograde example
@@ -39,6 +40,8 @@ func main() {
 	fmt.Printf("  Normalized Sign: %s\n", p.Sign)
 	fmt.Printf("  Nakshatra: %s (Pada %d)\n", p.Nakshatra.Name, p.Nakshatra.Pada)
 	fmt.Printf("  IsRetro: %v\n", p.IsRetro)
+	fmt.Printf("  SpeedCategory: %s\n", p.SpeedCategory)
+	fmt.Printf("  Vedha: %s\n", p.Vedha)
 	fmt.Printf("  Longitude DMS: %s\n\n", p.LongitudeDMS.String())
 
 	// Example 6: Calculate Uchch Bala (exaltation strength)

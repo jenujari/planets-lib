@@ -153,18 +153,21 @@ var grahaMaitriChakra = map[string]map[string]string{
 }
 
 type PlanetCord struct {
-	Longitude    float64 `json:"longitude"`
-	Latitude     float64 `json:"latitude"`
-	Distance     float64 `json:"distance"`
-	SpeedLong    float64 `json:"speedLong"`
-	SpeedLat     float64 `json:"speedLat"`
-	SpeedDist    float64 `json:"speedDist"`
-	LongitudeDMS DMS
-	LatitudeDMS  DMS
-	SpeedLongDMS DMS
-	Sign         string
-	Nakshatra    NakshatraPada
-	IsRetro      bool
+	Name          string        `json:"name"`
+	Longitude     float64       `json:"longitude"`
+	Latitude      float64       `json:"latitude"`
+	Distance      float64       `json:"distance"`
+	SpeedLong     float64       `json:"speedLong"`
+	SpeedLat      float64       `json:"speedLat"`
+	SpeedDist     float64       `json:"speedDist"`
+	SpeedCategory string        `json:"speedCategory"`
+	Vedha         string        `json:"vedha"`
+	LongitudeDMS  DMS           `json:"longitudeDMS"`
+	LatitudeDMS   DMS           `json:"latitudeDMS"`
+	SpeedLongDMS  DMS           `json:"speedLongDMS"`
+	Sign          string        `json:"sign"`
+	Nakshatra     NakshatraPada `json:"nakshatra"`
+	IsRetro       bool          `json:"isRetro"`
 }
 
 // CalculateDerivedValues computes derived fields from raw numeric fields.
@@ -197,6 +200,16 @@ func (p *PlanetCord) CalculateDerivedValues() {
 		p.IsRetro = false
 	} else {
 		p.IsRetro = p.SpeedLong < 0
+	}
+
+	cat, err := PlanetSpeedCategory(p.Name, p.SpeedLong)
+	if err == nil {
+		p.SpeedCategory = cat
+	}
+
+	vedha, err := PlanetSBCLRFVedha(p.Name, p.SpeedLong)
+	if err == nil {
+		p.Vedha = vedha
 	}
 }
 

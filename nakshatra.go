@@ -99,8 +99,8 @@ var NAKSHATRA_COUNT = map[string]int{
 }
 
 type NakshatraPada struct {
-	Name string
-	Pada int
+	Name string `json:"name"`
+	Pada int    `json:"pada"`
 }
 
 // rangeEntry defines a half-open interval [start, end) for a nakshatra pada.
