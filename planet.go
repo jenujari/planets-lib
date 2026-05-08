@@ -168,6 +168,8 @@ type PlanetCord struct {
 	Sign          string        `json:"sign"`
 	Nakshatra     NakshatraPada `json:"nakshatra"`
 	IsRetro       bool          `json:"isRetro"`
+	SignLord      string        `json:"signLord"`
+	SignLordship  string        `json:"signLordship"`
 }
 
 // CalculateDerivedValues computes derived fields from raw numeric fields.
@@ -210,6 +212,13 @@ func (p *PlanetCord) CalculateDerivedValues() {
 	vedha, err := PlanetSBCLRFVedha(p.Name, p.SpeedLong)
 	if err == nil {
 		p.Vedha = vedha
+	}
+
+	if p.Sign != "" {
+		p.SignLord = GetSignLord(p.Sign)
+		if p.SignLord != "" && p.Name != URANUS && p.Name != NEPTUNE && p.Name != PLUTO {
+			p.SignLordship, _ = GetGrahaMaitri(p.Name, p.SignLord)
+		}
 	}
 }
 

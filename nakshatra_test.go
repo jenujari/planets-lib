@@ -166,6 +166,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	// Speed category and vedha for retrograde Venus
 	assert.Equal(t, ATI_VAKRA, p.SpeedCategory, "retrograde Venus at -0.512 should be ati-vakra")
 	assert.Equal(t, RIGHT_VEDHA, p.Vedha, "ati-vakra category planet should have right vedha")
+	// Sign lord and lordship: Aries lord is Mars, Venus->Mars = Neutral
+	assert.Equal(t, MARS, p.SignLord, "Aries lord should be Mars")
+	assert.Equal(t, NEUTRAL, p.SignLordship, "Venus to Mars should be Neutral")
 
 	// DMS rounding: ensure LongitudeDMS.ToDegree approximates original absolute degree
 	lonDeg := p.LongitudeDMS.ToDegree()
@@ -190,6 +193,8 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p2.IsRetro, "expected IsRetro false for NaN speed")
 	assert.Equal(t, "", p2.SpeedCategory, "expected empty speed category for NaN speed")
 	assert.Equal(t, "", p2.Vedha, "expected empty vedha for NaN speed")
+	assert.Equal(t, "", p2.SignLord, "expected empty sign lord for NaN longitude")
+	assert.Equal(t, "", p2.SignLordship, "expected empty sign lordship for NaN longitude")
 
 	// DMS fields for NaN should be zeroed as per NewDMS/ParseFromDegree contract
 	assert.Equal(t, 0, p2.LongitudeDMS.D)
@@ -209,6 +214,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p3.IsRetro)
 	assert.Equal(t, SAMA, p3.SpeedCategory, "Mars at 0.5 should be sama")
 	assert.Equal(t, FRONT_VEDHA, p3.Vedha, "sama Mars should have front vedha")
+	// Aries lord is Mars, Mars->Mars = Self
+	assert.Equal(t, MARS, p3.SignLord, "Aries lord should be Mars")
+	assert.Equal(t, SELF, p3.SignLordship, "Mars to Mars should be Self")
 
 	// Case D: near 360 boundary -> sign Pisces, nakshatra Revati p4
 	p4 := &PlanetCord{
@@ -223,6 +231,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p4.IsRetro)
 	assert.Equal(t, MADHYAM, p4.SpeedCategory, "Jupiter at 0.1 should be madhyam")
 	assert.Equal(t, FRONT_VEDHA, p4.Vedha, "madhyam Jupiter should have front vedha")
+	// Pisces lord is Jupiter, Jupiter->Jupiter = Self
+	assert.Equal(t, JUPITER, p4.SignLord, "Pisces lord should be Jupiter")
+	assert.Equal(t, SELF, p4.SignLordship, "Jupiter to Jupiter should be Self")
 
 	// Case E: Sun with normal positive speed -> non-retro, ati-sheeghra category, left vedha
 	p5 := &PlanetCord{
@@ -235,6 +246,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p5.IsRetro)
 	assert.Equal(t, ATI_SHEEGHRA, p5.SpeedCategory, "Sun at 1.05 should be ati-sheeghra")
 	assert.Equal(t, LEFT_VEDHA, p5.Vedha, "ati-sheeghra Sun should have left vedha")
+	// Taurus lord is Venus, Sun->Venus = Enemy
+	assert.Equal(t, VENUS, p5.SignLord, "Taurus lord should be Venus")
+	assert.Equal(t, ENEMY, p5.SignLordship, "Sun to Venus should be Enemy")
 
 	// Case F: Rahu always gets left vedha regardless of speed
 	p6 := &PlanetCord{
@@ -247,4 +261,18 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.True(t, p6.IsRetro)
 	assert.Equal(t, VAKRA, p6.SpeedCategory, "Rahu at -0.05 should be vakra")
 	assert.Equal(t, LEFT_VEDHA, p6.Vedha, "Rahu should always have left vedha")
+	// Leo lord is Sun, Rahu->Sun = Enemy
+	assert.Equal(t, SUN, p6.SignLord, "Leo lord should be Sun")
+	assert.Equal(t, ENEMY, p6.SignLordship, "Rahu to Sun should be Enemy")
+
+	// Case G: outer planet (Neptune) -> SignLord populated, SignLordship skipped
+	p7 := &PlanetCord{
+		Name:      NEPTUNE,
+		Longitude: 45.0, // Taurus
+		SpeedLong: 0.01,
+	}
+	p7.CalculateDerivedValues()
+	assert.Equal(t, SIGN_TAURUS, p7.Sign)
+	assert.Equal(t, VENUS, p7.SignLord, "Taurus lord should be Venus")
+	assert.Equal(t, "", p7.SignLordship, "outer planet should not get SignLordship")
 }
