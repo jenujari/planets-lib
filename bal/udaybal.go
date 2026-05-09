@@ -14,12 +14,12 @@ import (
 // Parameters:
 //   - sun_long: Longitude of the Sun in degrees.
 //   - pl_long: Longitude of the planet in degrees.
-//   - pl_speed: Longitudinal speed of the planet (degrees per day).
+//   - isRetro: Whether the planet is in retrograde motion.
 //   - pl_name: Name of the planet (use constants like baselib.SUN, baselib.MOON, etc.).
 //
 // Returns:
 //   - The calculated Udaybal value ranging from 0 to 100.
-func UdayBal(sun_long, pl_long, pl_speed float64, pl_name string) float64 {
+func UdayBal(sun_long, pl_long float64, isRetro bool, pl_name string) float64 {
 	const MaxRetrunValue = 100.0
 	const MinReturnValue = 0.0
 
@@ -33,9 +33,7 @@ func UdayBal(sun_long, pl_long, pl_speed float64, pl_name string) float64 {
 		return MinReturnValue
 	}
 
-	// Determine motion: direct or retro
-	// speed >= 0 => Direct, speed < 0 => retro
-	isRetro := pl_speed < 0
+
 
 	// Decide planet astance (pl_ast)
 	var pl_ast float64

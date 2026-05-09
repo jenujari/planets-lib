@@ -58,8 +58,8 @@ func main() {
 	sunLong := 10.0
 	marsLong := 40.0
 	marsSpeed := 0.5
-	udayBal := bal.UdayBal(sunLong, marsLong, marsSpeed, baselib.MARS)
-	fmt.Printf("Example: UdayBal\n  Sun: %.2f°, Mars: %.2f°, Speed: %.2f -> Udaybal: %.2f\n\n", sunLong, marsLong, marsSpeed, udayBal)
+	udayBal := bal.UdayBal(sunLong, marsLong, marsSpeed < 0, baselib.MARS)
+	fmt.Printf("Example: UdayBal\n  Sun: %.2f°, Mars: %.2f°, IsRetro: %v -> Udaybal: %.2f\n\n", sunLong, marsLong, marsSpeed < 0, udayBal)
 
 	// Example 9: Calculate Vakra Bal (retrograde strength)
 	retroMarsSpeed := -0.4
