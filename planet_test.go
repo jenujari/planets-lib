@@ -227,3 +227,62 @@ func TestGetGrahaMaitri(t *testing.T) {
 		})
 	}
 }
+
+func TestPlanetCord_CalculateDerivedValues_Vargottama(t *testing.T) {
+	tests := []struct {
+		name              string
+		longitude         float64
+		expectedSign      string
+		expectedNavamsa   string
+		expectedVargottam bool
+	}{
+		{
+			name:              "Aries first navamsa (Vargottama)",
+			longitude:         1.5,
+			expectedSign:      SIGN_ARIES,
+			expectedNavamsa:   SIGN_ARIES,
+			expectedVargottam: true,
+		},
+		{
+			name:              "Aries second navamsa (Not Vargottama)",
+			longitude:         5.0,
+			expectedSign:      SIGN_ARIES,
+			expectedNavamsa:   SIGN_TAURUS,
+			expectedVargottam: false,
+		},
+		{
+			name:              "Cancer first navamsa (Vargottama)",
+			longitude:         92.0, // 90 to 93.33 is Cancer navamsa
+			expectedSign:      SIGN_CANCER,
+			expectedNavamsa:   SIGN_CANCER,
+			expectedVargottam: true,
+		},
+		{
+			name:              "Cancer second navamsa (Not Vargottama)",
+			longitude:         95.0,
+			expectedSign:      SIGN_CANCER,
+			expectedNavamsa:   SIGN_LEO,
+			expectedVargottam: false,
+		},
+		{
+			name:              "NaN Longitude (Not Vargottama, no panic)",
+			longitude:         math.NaN(),
+			expectedSign:      "",
+			expectedNavamsa:   "",
+			expectedVargottam: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &PlanetCord{
+				Name:      SUN,
+				Longitude: tt.longitude,
+			}
+			p.CalculateDerivedValues()
+			assert.Equal(t, tt.expectedSign, p.Sign, "Sign mismatch")
+			assert.Equal(t, tt.expectedNavamsa, p.NavamsaSign, "NavamsaSign mismatch")
+			assert.Equal(t, tt.expectedVargottam, p.Vargottama, "Vargottama mismatch")
+		})
+	}
+}

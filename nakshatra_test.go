@@ -161,6 +161,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	// Nakshatra should be Ashwini pada 1
 	assert.Equal(t, NAKSHATRA_ASHWINI, p.Nakshatra.Name)
 	assert.Equal(t, 1, p.Nakshatra.Pada)
+	// Aries 1.5 deg is in Ashwini pada 1, Navamsa is Aries. Therefore Vargottama.
+	assert.Equal(t, SIGN_ARIES, p.NavamsaSign)
+	assert.True(t, p.Vargottama)
 	// Retrograde must be true for negative finite speed
 	assert.True(t, p.IsRetro)
 	// Speed category and vedha for retrograde Venus
@@ -190,6 +193,8 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.Equal(t, "", p2.Sign, "expected empty sign for NaN longitude")
 	assert.Equal(t, "", p2.Nakshatra.Name, "expected empty nakshatra name for NaN longitude")
 	assert.Equal(t, 0, p2.Nakshatra.Pada, "expected pada 0 for NaN longitude")
+	assert.Equal(t, "", p2.NavamsaSign, "expected empty navamsa sign for NaN longitude")
+	assert.False(t, p2.Vargottama, "expected Vargottama false for NaN longitude")
 	assert.False(t, p2.IsRetro, "expected IsRetro false for NaN speed")
 	assert.Equal(t, "", p2.SpeedCategory, "expected empty speed category for NaN speed")
 	assert.Equal(t, "", p2.Vedha, "expected empty vedha for NaN speed")
@@ -211,6 +216,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.Equal(t, SIGN_ARIES, p3.Sign)
 	assert.Equal(t, NAKSHATRA_ASHWINI, p3.Nakshatra.Name)
 	assert.Equal(t, 2, p3.Nakshatra.Pada)
+	// Ashwini pada 2 means Taurus navamsa, but mathematically 3.333333 / (30/9) < 1, so Navamsa index is 0 (Aries).
+	assert.Equal(t, SIGN_ARIES, p3.NavamsaSign)
+	assert.True(t, p3.Vargottama)
 	assert.False(t, p3.IsRetro)
 	assert.Equal(t, SAMA, p3.SpeedCategory, "Mars at 0.5 should be sama")
 	assert.Equal(t, FRONT_VEDHA, p3.Vedha, "sama Mars should have front vedha")
@@ -228,6 +236,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.Equal(t, SIGN_PISCES, p4.Sign)
 	assert.Equal(t, NAKSHATRA_REVATI, p4.Nakshatra.Name)
 	assert.Equal(t, 4, p4.Nakshatra.Pada)
+	// Revati pada 4 is Pisces navamsa
+	assert.Equal(t, SIGN_PISCES, p4.NavamsaSign)
+	assert.True(t, p4.Vargottama)
 	assert.False(t, p4.IsRetro)
 	assert.Equal(t, MADHYAM, p4.SpeedCategory, "Jupiter at 0.1 should be madhyam")
 	assert.Equal(t, FRONT_VEDHA, p4.Vedha, "madhyam Jupiter should have front vedha")
@@ -243,6 +254,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	}
 	p5.CalculateDerivedValues()
 	assert.Equal(t, SIGN_TAURUS, p5.Sign)
+	// Taurus 45deg (15deg in Taurus) -> Rohini pada 2 -> Taurus navamsa
+	assert.Equal(t, SIGN_TAURUS, p5.NavamsaSign)
+	assert.True(t, p5.Vargottama)
 	assert.False(t, p5.IsRetro)
 	assert.Equal(t, ATI_SHEEGHRA, p5.SpeedCategory, "Sun at 1.05 should be ati-sheeghra")
 	assert.Equal(t, LEFT_VEDHA, p5.Vedha, "ati-sheeghra Sun should have left vedha")
@@ -258,6 +272,9 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	}
 	p6.CalculateDerivedValues()
 	assert.Equal(t, SIGN_LEO, p6.Sign)
+	// Leo 120deg (0deg in Leo) -> Magha pada 1 -> Aries navamsa
+	assert.Equal(t, SIGN_ARIES, p6.NavamsaSign)
+	assert.False(t, p6.Vargottama)
 	assert.True(t, p6.IsRetro)
 	assert.Equal(t, VAKRA, p6.SpeedCategory, "Rahu at -0.05 should be vakra")
 	assert.Equal(t, LEFT_VEDHA, p6.Vedha, "Rahu should always have left vedha")

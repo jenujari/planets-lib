@@ -166,10 +166,12 @@ type PlanetCord struct {
 	LatitudeDMS   DMS           `json:"latitudeDMS"`
 	SpeedLongDMS  DMS           `json:"speedLongDMS"`
 	Sign          string        `json:"sign"`
+	NavamsaSign   string        `json:"navamsaSign"`
 	Nakshatra     NakshatraPada `json:"nakshatra"`
 	IsRetro       bool          `json:"isRetro"`
 	SignLord      string        `json:"signLord"`
 	SignLordship  string        `json:"signLordship"`
+	Vargottama    bool          `json:"vargottama"`
 }
 
 // CalculateDerivedValues computes derived fields from raw numeric fields.
@@ -190,11 +192,20 @@ func (p *PlanetCord) CalculateDerivedValues() {
 		// Invalid longitude -> clear sign and nakshatra to indicate unknown
 		p.Sign = ""
 		p.Nakshatra = NakshatraPada{}
+		p.NavamsaSign = ""
+		p.Vargottama = false
 	} else {
 		normLon := NormalizeAngle(p.Longitude)
 		// The helper functions will also defensively handle edge cases if necessary.
 		p.Sign = GetSignFrmDegree(normLon)
 		p.Nakshatra = GetNakshatraPadaFromDegree(normLon)
+		
+		_, p.NavamsaSign = CalcNavanshRashi(normLon)
+		if p.Sign != "" && p.Sign == p.NavamsaSign {
+			p.Vargottama = true
+		} else {
+			p.Vargottama = false
+		}
 	}
 
 	// Determine retrograde flag only when speed is finite.
