@@ -30,10 +30,10 @@ const (
 	SHEEGHRA     = "sheeghra"
 	ATI_SHEEGHRA = "ati-sheeghra"
 
-	LEFT_VEDHA  = "left-vedha"
-	RIGHT_VEDHA = "right-vedha"
-	FRONT_VEDHA = "front-vedha"
-	NO_VEDHA    = "no-vedha"
+	LEFT_VEDHA  = "left"
+	RIGHT_VEDHA = "right"
+	FRONT_VEDHA = "front"
+	NO_VEDHA    = "no"
 
 	FRIEND  = "Friend"
 	NEUTRAL = "Neutral"
@@ -199,7 +199,7 @@ func (p *PlanetCord) CalculateDerivedValues() {
 		// The helper functions will also defensively handle edge cases if necessary.
 		p.Sign = GetSignFrmDegree(normLon)
 		p.Nakshatra = GetNakshatraPadaFromDegree(normLon)
-		
+
 		_, p.NavamsaSign = CalcNavanshRashi(normLon)
 		if p.Sign != "" && p.Sign == p.NavamsaSign {
 			p.Vargottama = true

@@ -23,7 +23,7 @@ const (
 	NAKSHATRA_SWATI             = "Swati"
 	NAKSHATRA_VISHAKHA          = "Vishakha"
 	NAKSHATRA_ANURADHA          = "Anuradha"
-	NAKSHATRA_JYESTHA           = "Jyeshtha"
+	NAKSHATRA_JYESTHA           = "Jyestha"
 	NAKSHATRA_MOOLA             = "Moola"
 	NAKSHATRA_PURVA_ASHADHA     = "Purva Ashadha"
 	NAKSHATRA_UTTARA_ASHADHA    = "Uttara Ashadha"
@@ -216,7 +216,7 @@ var nakshatraRanges = []rangeEntry{
 	{220.000000, 223.333333, NAKSHATRA_ANURADHA, 3},
 	{223.333333, 226.666666, NAKSHATRA_ANURADHA, 4},
 
-	// Jyeshtha
+	// Jyestha
 	{226.666666, 230.000000, NAKSHATRA_JYESTHA, 1},
 	{230.000000, 233.333333, NAKSHATRA_JYESTHA, 2},
 	{233.333333, 236.666666, NAKSHATRA_JYESTHA, 3},
