@@ -33,8 +33,6 @@ func UdayBal(sun_long, pl_long float64, isRetro bool, pl_name string) float64 {
 		return MinReturnValue
 	}
 
-
-
 	// Decide planet astance (pl_ast)
 	var pl_ast float64
 	switch pl_name {

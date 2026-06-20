@@ -121,7 +121,7 @@ func TestGetNakshatraFromVowel_BasicMappings(t *testing.T) {
 		{
 			code: "AA",
 			expected: NakshatraPada{
-				Name: NAKSHATRA_KRITTICA,
+				Name: NAKSHATRA_KRITTIKA,
 				Pada: 1,
 			},
 		},
@@ -169,6 +169,7 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	// Speed category and vedha for retrograde Venus
 	assert.Equal(t, ATI_VAKRA, p.SpeedCategory, "retrograde Venus at -0.512 should be ati-vakra")
 	assert.Equal(t, RIGHT_VEDHA, p.Vedha, "ati-vakra category planet should have right vedha")
+	assert.Equal(t, NAKSHATRA_JYESTHA, p.VedhaTarget, "Ashwini right vedha target should be Jyestha")
 	// Sign lord and lordship: Aries lord is Mars, Venus->Mars = Neutral
 	assert.Equal(t, MARS, p.SignLord, "Aries lord should be Mars")
 	assert.Equal(t, NEUTRAL, p.SignLordship, "Venus to Mars should be Neutral")
@@ -198,6 +199,7 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p2.IsRetro, "expected IsRetro false for NaN speed")
 	assert.Equal(t, "", p2.SpeedCategory, "expected empty speed category for NaN speed")
 	assert.Equal(t, "", p2.Vedha, "expected empty vedha for NaN speed")
+	assert.Equal(t, "", p2.VedhaTarget, "expected empty vedha target for NaN inputs")
 	assert.Equal(t, "", p2.SignLord, "expected empty sign lord for NaN longitude")
 	assert.Equal(t, "", p2.SignLordship, "expected empty sign lordship for NaN longitude")
 
@@ -222,6 +224,7 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p3.IsRetro)
 	assert.Equal(t, SAMA, p3.SpeedCategory, "Mars at 0.5 should be sama")
 	assert.Equal(t, FRONT_VEDHA, p3.Vedha, "sama Mars should have front vedha")
+	assert.Equal(t, NAKSHATRA_PURVA_PHALGUNI, p3.VedhaTarget, "Ashwini front vedha target should be Purva Phalguni")
 	// Aries lord is Mars, Mars->Mars = Self
 	assert.Equal(t, MARS, p3.SignLord, "Aries lord should be Mars")
 	assert.Equal(t, SELF, p3.SignLordship, "Mars to Mars should be Self")
@@ -242,6 +245,7 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p4.IsRetro)
 	assert.Equal(t, MADHYAM, p4.SpeedCategory, "Jupiter at 0.1 should be madhyam")
 	assert.Equal(t, FRONT_VEDHA, p4.Vedha, "madhyam Jupiter should have front vedha")
+	assert.Equal(t, NAKSHATRA_UTTARA_PHALGUNI, p4.VedhaTarget, "Revati front vedha target should be Uttara Phalguni")
 	// Pisces lord is Jupiter, Jupiter->Jupiter = Self
 	assert.Equal(t, JUPITER, p4.SignLord, "Pisces lord should be Jupiter")
 	assert.Equal(t, SELF, p4.SignLordship, "Jupiter to Jupiter should be Self")
@@ -260,6 +264,7 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.False(t, p5.IsRetro)
 	assert.Equal(t, ATI_SHEEGHRA, p5.SpeedCategory, "Sun at 1.05 should be ati-sheeghra")
 	assert.Equal(t, LEFT_VEDHA, p5.Vedha, "ati-sheeghra Sun should have left vedha")
+	assert.Equal(t, NAKSHATRA_SWATI, p5.VedhaTarget, "Rohini left vedha target should be Swati")
 	// Taurus lord is Venus, Sun->Venus = Enemy
 	assert.Equal(t, VENUS, p5.SignLord, "Taurus lord should be Venus")
 	assert.Equal(t, ENEMY, p5.SignLordship, "Sun to Venus should be Enemy")
@@ -278,6 +283,7 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	assert.True(t, p6.IsRetro)
 	assert.Equal(t, VAKRA, p6.SpeedCategory, "Rahu at -0.05 should be vakra")
 	assert.Equal(t, LEFT_VEDHA, p6.Vedha, "Rahu should always have left vedha")
+	assert.Equal(t, NAKSHATRA_SHRAVANA, p6.VedhaTarget, "Magha left vedha target should be Shravana")
 	// Leo lord is Sun, Rahu->Sun = Enemy
 	assert.Equal(t, SUN, p6.SignLord, "Leo lord should be Sun")
 	assert.Equal(t, ENEMY, p6.SignLordship, "Rahu to Sun should be Enemy")
@@ -290,6 +296,8 @@ func TestPlanetCord_CalculateDerivedValues_NormalizationAndNaN(t *testing.T) {
 	}
 	p7.CalculateDerivedValues()
 	assert.Equal(t, SIGN_TAURUS, p7.Sign)
+	assert.Equal(t, FRONT_VEDHA, p7.Vedha, "Neptune at 0.01 should have front vedha")
+	assert.Equal(t, NAKSHATRA_ABHIJIT, p7.VedhaTarget, "Rohini front vedha target should be Abhijit")
 	assert.Equal(t, VENUS, p7.SignLord, "Taurus lord should be Venus")
 	assert.Equal(t, "", p7.SignLordship, "outer planet should not get SignLordship")
 }

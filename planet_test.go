@@ -230,46 +230,58 @@ func TestGetGrahaMaitri(t *testing.T) {
 
 func TestPlanetCord_CalculateDerivedValues_Vargottama(t *testing.T) {
 	tests := []struct {
-		name              string
-		longitude         float64
-		expectedSign      string
-		expectedNavamsa   string
-		expectedVargottam bool
+		name                string
+		longitude           float64
+		speedLong           float64
+		expectedSign        string
+		expectedNavamsa     string
+		expectedVargottam   bool
+		expectedVedhaTarget string
 	}{
 		{
-			name:              "Aries first navamsa (Vargottama)",
-			longitude:         1.5,
-			expectedSign:      SIGN_ARIES,
-			expectedNavamsa:   SIGN_ARIES,
-			expectedVargottam: true,
+			name:                "Aries first navamsa (Vargottama)",
+			longitude:           1.5,
+			speedLong:           0.0,
+			expectedSign:        SIGN_ARIES,
+			expectedNavamsa:     SIGN_ARIES,
+			expectedVargottam:   true,
+			expectedVedhaTarget: "",
 		},
 		{
-			name:              "Aries second navamsa (Not Vargottama)",
-			longitude:         5.0,
-			expectedSign:      SIGN_ARIES,
-			expectedNavamsa:   SIGN_TAURUS,
-			expectedVargottam: false,
+			name:                "Aries second navamsa (Not Vargottama)",
+			longitude:           5.0,
+			speedLong:           0.0,
+			expectedSign:        SIGN_ARIES,
+			expectedNavamsa:     SIGN_TAURUS,
+			expectedVargottam:   false,
+			expectedVedhaTarget: "",
 		},
 		{
-			name:              "Cancer first navamsa (Vargottama)",
-			longitude:         92.0, // 90 to 93.33 is Cancer navamsa
-			expectedSign:      SIGN_CANCER,
-			expectedNavamsa:   SIGN_CANCER,
-			expectedVargottam: true,
+			name:                "Cancer first navamsa (Vargottama) with left vedha",
+			longitude:           92.0, // 90 to 93.33 is Cancer navamsa, Punarvasu pada 4
+			speedLong:           1.05, // ati-sheeghra for Sun -> LEFT_VEDHA
+			expectedSign:        SIGN_CANCER,
+			expectedNavamsa:     SIGN_CANCER,
+			expectedVargottam:   true,
+			expectedVedhaTarget: NAKSHATRA_UTTARA_PHALGUNI, // Punarvasu left vedha target
 		},
 		{
-			name:              "Cancer second navamsa (Not Vargottama)",
-			longitude:         95.0,
-			expectedSign:      SIGN_CANCER,
-			expectedNavamsa:   SIGN_LEO,
-			expectedVargottam: false,
+			name:                "Cancer second navamsa (Not Vargottama) with front vedha",
+			longitude:           95.0, // Pushya pada 2
+			speedLong:           0.98, // madhyam for Sun -> FRONT_VEDHA
+			expectedSign:        SIGN_CANCER,
+			expectedNavamsa:     SIGN_LEO,
+			expectedVargottam:   false,
+			expectedVedhaTarget: NAKSHATRA_JYESTHA, // Pushya front vedha target
 		},
 		{
-			name:              "NaN Longitude (Not Vargottama, no panic)",
-			longitude:         math.NaN(),
-			expectedSign:      "",
-			expectedNavamsa:   "",
-			expectedVargottam: false,
+			name:                "NaN Longitude (Not Vargottama, no panic)",
+			longitude:           math.NaN(),
+			speedLong:           0.0,
+			expectedSign:        "",
+			expectedNavamsa:     "",
+			expectedVargottam:   false,
+			expectedVedhaTarget: "",
 		},
 	}
 
@@ -278,11 +290,13 @@ func TestPlanetCord_CalculateDerivedValues_Vargottama(t *testing.T) {
 			p := &PlanetCord{
 				Name:      SUN,
 				Longitude: tt.longitude,
+				SpeedLong: tt.speedLong,
 			}
 			p.CalculateDerivedValues()
 			assert.Equal(t, tt.expectedSign, p.Sign, "Sign mismatch")
 			assert.Equal(t, tt.expectedNavamsa, p.NavamsaSign, "NavamsaSign mismatch")
 			assert.Equal(t, tt.expectedVargottam, p.Vargottama, "Vargottama mismatch")
+			assert.Equal(t, tt.expectedVedhaTarget, p.VedhaTarget, "VedhaTarget mismatch")
 		})
 	}
 }

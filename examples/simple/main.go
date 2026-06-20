@@ -80,6 +80,13 @@ func main() {
 	navBal, _ := bal.NavanshBal(1.666666, baselib.MARS) // Aries Navamsha Midpoint
 	fmt.Printf("Example: NavanshBal\n  Mars in Aries Navamsha Midpoint -> Navansh Bal: %.2f%%\n\n", navBal)
 
+	// Example 13: Calculate Vedha Target
+	nakName := baselib.NAKSHATRA_ASHWINI
+	leftTarget := baselib.VedhaTarget(nakName, baselib.LEFT_VEDHA)
+	rightTarget := baselib.VedhaTarget(nakName, baselib.RIGHT_VEDHA)
+	frontTarget := baselib.VedhaTarget(nakName, baselib.FRONT_VEDHA)
+	fmt.Printf("Example: VedhaTarget\n  Nakshatra: %s -> Left Vedha Target: %s, Right Vedha Target: %s, Front Vedha Target: %s\n\n", nakName, leftTarget, rightTarget, frontTarget)
+
 	// Example 5: Handling invalid inputs (NaN / Inf)
 	invalid := math.NaN()
 	fmt.Printf("Example: Invalid inputs\n")

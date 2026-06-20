@@ -162,6 +162,7 @@ type PlanetCord struct {
 	SpeedDist     float64       `json:"speedDist"`
 	SpeedCategory string        `json:"speedCategory"`
 	Vedha         string        `json:"vedha"`
+	VedhaTarget   string        `json:"vedhaTarget"`
 	LongitudeDMS  DMS           `json:"longitudeDMS"`
 	LatitudeDMS   DMS           `json:"latitudeDMS"`
 	SpeedLongDMS  DMS           `json:"speedLongDMS"`
@@ -224,6 +225,8 @@ func (p *PlanetCord) CalculateDerivedValues() {
 	if err == nil {
 		p.Vedha = vedha
 	}
+
+	p.VedhaTarget = VedhaTarget(p.Nakshatra.Name, p.Vedha)
 
 	if p.Sign != "" {
 		p.SignLord = GetSignLord(p.Sign)

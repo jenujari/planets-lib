@@ -7,6 +7,24 @@ const (
 	maxTithy        = 30
 )
 
+const (
+	SUNDAY    = "Sun"
+	MONDAY    = "Mon"
+	TUESDAY   = "Tue"
+	WEDNESDAY = "Wed"
+	THURSDAY  = "Thu"
+	FRIDAY    = "Fri"
+	SATURDAY  = "Sat"
+)
+
+const (
+	NANDA  = "Nanda"
+	BHADRA = "Bhadra"
+	JAYA   = "Jaya"
+	RIKTA  = "Rikta"
+	POORNA = "Poorna"
+)
+
 // NormalizeAngle returns an angle normalized into the range [0, 360).
 // If the input is NaN or infinite, it returns NaN.
 func NormalizeAngle(angle float64) float64 {
