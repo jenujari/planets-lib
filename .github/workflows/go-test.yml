@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           # Pick an appropriate Go version for your project. You can change this as needed.
-          go-version: 1.25.6
+          go-version: 1.26.4
 
       - name: Download dependencies
         run: go mod download
