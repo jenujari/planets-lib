@@ -33,6 +33,14 @@ func UdayBal(sun_long, pl_long float64, isRetro bool, pl_name string) float64 {
 		return MinReturnValue
 	}
 
+	// Guard invalid longitudes before the distance arithmetic below, which would
+	// otherwise yield NaN. Checked after the two cases above, which are decided by
+	// the planet alone and never read the longitudes.
+	if math.IsNaN(sun_long) || math.IsInf(sun_long, 0) ||
+		math.IsNaN(pl_long) || math.IsInf(pl_long, 0) {
+		return MinReturnValue
+	}
+
 	// Decide planet astance (pl_ast)
 	var pl_ast float64
 	switch pl_name {

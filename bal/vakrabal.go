@@ -1,6 +1,10 @@
 package bal
 
-import baselib "github.com/jenujari/planets-lib"
+import (
+	baselib "github.com/jenujari/planets-lib"
+
+	"math"
+)
 
 // VakraBal calculates the Vakra Bal (retrograde strength) of a planet.
 // It is based on the planet's retrograde speed relative to its maximum possible retrograde speed.
@@ -23,6 +27,14 @@ func VakraBal(pl_speed float64, pl_name string) float64 {
 	// Rahu and Ketu are always retrograde in traditional Vedic astrology.
 	if pl_name == baselib.RAHU || pl_name == baselib.KETU {
 		return MaxRetrunValue
+	}
+
+	// Guard invalid speeds before they reach the arithmetic below. Checked here
+	// rather than at the top of the function so the cases above, which are decided
+	// by the planet alone and never read pl_speed, keep their definitional answers.
+	// Previously -Inf produced a full-strength 100 and NaN propagated silently.
+	if math.IsNaN(pl_speed) || math.IsInf(pl_speed, 0) {
+		return MinReturnValue
 	}
 
 	// If speed is positive (direct motion), Vakra Bal is 0.

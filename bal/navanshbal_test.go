@@ -1,6 +1,7 @@
 package bal
 
 import (
+	"math"
 	"testing"
 
 	baselib "github.com/jenujari/planets-lib"
@@ -51,4 +52,31 @@ func BenchmarkNavanshBal(b *testing.B) {
 		r, _ = NavanshBal(15.0, baselib.MARS)
 	}
 	test_bal = r
+}
+
+// NavanshBal used to panic on invalid longitudes because CalcNavanshRashi indexed
+// SIGNS out of range. It must now fail gracefully with an error instead.
+func TestNavanshBal_InvalidLongitudes(t *testing.T) {
+	invalid := []struct {
+		name    string
+		pl_long float64
+	}{
+		{"NaN", math.NaN()},
+		{"positive infinity", math.Inf(1)},
+		{"negative infinity", math.Inf(-1)},
+	}
+
+	for _, tt := range invalid {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Fatalf("NavanshBal(%v) panicked: %v", tt.pl_long, r)
+				}
+			}()
+
+			got, err := NavanshBal(tt.pl_long, baselib.MARS)
+			assert.Error(t, err, "expected an error for an unusable longitude")
+			assert.Equal(t, 0.0, got)
+		})
+	}
 }

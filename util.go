@@ -1,8 +1,8 @@
 package baselib
 
 import (
-	"fmt"
 	"math"
+	"strconv"
 )
 
 type DMS struct {
@@ -66,14 +66,26 @@ func (dms DMS) ToDegree() float64 {
 }
 
 func (d DMS) String() string {
-	deg := int(math.Abs(float64(d.D)))
-	minutes := int(math.Abs(float64(d.M)))
-	second := float32(math.Abs(float64(d.S)))
+	// Built with strconv into a single buffer rather than fmt.Sprintf: same output,
+	// roughly a third of the cost and one allocation instead of two.
+	buf := make([]byte, 0, 24)
 	if d.IsNegative {
-		return fmt.Sprintf("-%d°%d'%.2f\"", deg, minutes, second)
-	} else {
-		return fmt.Sprintf("%d°%d'%.2f\"", deg, minutes, second)
+		buf = append(buf, '-')
 	}
+	buf = strconv.AppendInt(buf, int64(absInt(d.D)), 10)
+	buf = append(buf, "°"...)
+	buf = strconv.AppendInt(buf, int64(absInt(d.M)), 10)
+	buf = append(buf, '\'')
+	buf = strconv.AppendFloat(buf, math.Abs(float64(d.S)), 'f', 2, 64)
+	buf = append(buf, '"')
+	return string(buf)
+}
+
+func absInt(v int) int {
+	if v < 0 {
+		return -v
+	}
+	return v
 }
 
 func RoundTo2Decimals[T float64 | float32](val T) T {

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	baselib "github.com/jenujari/planets-lib"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUchhBal(t *testing.T) {
@@ -43,4 +44,26 @@ func BenchmarkUchhBal(b *testing.B) {
 		result = UchhBal(10, baselib.SUN)
 	}
 	test_bal = result
+}
+
+// Invalid longitudes previously flowed through math.Cos and returned NaN.
+func TestUchhBal_InvalidLongitudes(t *testing.T) {
+	invalid := []struct {
+		name    string
+		pl_long float64
+	}{
+		{"NaN", math.NaN()},
+		{"positive infinity", math.Inf(1)},
+		{"negative infinity", math.Inf(-1)},
+	}
+
+	for _, tt := range invalid {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, planet := range []string{baselib.SUN, baselib.MOON, baselib.MARS, baselib.SATURN, baselib.RAHU} {
+				got := UchhBal(tt.pl_long, planet)
+				assert.False(t, math.IsNaN(got), "UchhBal(%v, %s) returned NaN", tt.pl_long, planet)
+				assert.Equal(t, 0.0, got, "planet %s", planet)
+			}
+		})
+	}
 }

@@ -1,6 +1,7 @@
 package bal
 
 import (
+	"math"
 	"testing"
 
 	baselib "github.com/jenujari/planets-lib"
@@ -201,4 +202,36 @@ func BenchmarkUdayBal(b *testing.B) {
 		result = UdayBal(0, 45, false, baselib.VENUS)
 	}
 	test_bal = result
+}
+
+// Invalid longitudes previously produced NaN out of the distance arithmetic.
+func TestUdayBal_InvalidLongitudes(t *testing.T) {
+	invalid := []struct {
+		name string
+		bad  float64
+	}{
+		{"NaN", math.NaN()},
+		{"positive infinity", math.Inf(1)},
+		{"negative infinity", math.Inf(-1)},
+	}
+
+	for _, tt := range invalid {
+		t.Run(tt.name+" in either longitude returns 0", func(t *testing.T) {
+			for _, planet := range []string{baselib.MOON, baselib.MARS, baselib.MERCURY, baselib.VENUS, baselib.JUPITER, baselib.SATURN} {
+				assert.Equal(t, 0.0, UdayBal(tt.bad, 100, false, planet), "bad sun_long, planet %s", planet)
+				assert.Equal(t, 0.0, UdayBal(100, tt.bad, false, planet), "bad pl_long, planet %s", planet)
+				assert.Equal(t, 0.0, UdayBal(tt.bad, tt.bad, false, planet), "both bad, planet %s", planet)
+			}
+		})
+
+		// The Sun is full strength by definition and never reads the longitudes.
+		t.Run(tt.name+" keeps Sun definitional", func(t *testing.T) {
+			assert.Equal(t, 100.0, UdayBal(tt.bad, tt.bad, false, baselib.SUN))
+		})
+
+		t.Run(tt.name+" keeps Rahu/Ketu at 0", func(t *testing.T) {
+			assert.Equal(t, 0.0, UdayBal(tt.bad, tt.bad, false, baselib.RAHU))
+			assert.Equal(t, 0.0, UdayBal(tt.bad, tt.bad, false, baselib.KETU))
+		})
+	}
 }
