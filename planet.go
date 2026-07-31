@@ -216,14 +216,11 @@ func (p *PlanetCord) CalculateDerivedValues() {
 		p.IsRetro = p.SpeedLong < 0
 	}
 
+	// Classify the speed once; the vedha rules reuse the same category.
 	cat, err := PlanetSpeedCategory(p.Name, p.SpeedLong)
 	if err == nil {
 		p.SpeedCategory = cat
-	}
-
-	vedha, err := PlanetSBCLRFVedha(p.Name, p.SpeedLong)
-	if err == nil {
-		p.Vedha = vedha
+		p.Vedha = vedhaFromSpeedCategory(p.Name, cat)
 	}
 
 	p.VedhaTarget = VedhaTarget(p.Nakshatra.Name, p.Vedha)
@@ -279,44 +276,45 @@ func PlanetSBCLRFVedha(planet string, speed float64) (string, error) {
 		return "", err
 	}
 
+	return vedhaFromSpeedCategory(planet, speedCat), nil
+}
+
+// vedhaFromSpeedCategory applies the SBCLRF vedha rules to an already-classified
+// speed category. Callers that have run PlanetSpeedCategory use this directly to
+// avoid classifying the same speed twice.
+func vedhaFromSpeedCategory(planet, speedCat string) string {
 	if planet == RAHU || planet == KETU {
-		return LEFT_VEDHA, nil
+		return LEFT_VEDHA
 	}
 
 	if planet == SUN {
 		switch speedCat {
-		case SAMA:
-			fallthrough
-		case SHEEGHRA:
-			fallthrough
-		case ATI_SHEEGHRA:
-			return LEFT_VEDHA, nil
-		case MAND:
-			fallthrough
-		case MADHYAM:
-			return FRONT_VEDHA, nil
+		case SAMA, SHEEGHRA, ATI_SHEEGHRA:
+			return LEFT_VEDHA
+		case MAND, MADHYAM:
+			return FRONT_VEDHA
 		default:
-			return NO_VEDHA, nil
+			return NO_VEDHA
 		}
 	}
 
 	if planet == MOON {
 		if speedCat == SAMA || speedCat == SHEEGHRA || speedCat == ATI_SHEEGHRA {
-			return LEFT_VEDHA, nil
+			return LEFT_VEDHA
 		}
-		return FRONT_VEDHA, nil
+		return FRONT_VEDHA
 	}
 
 	// When Vakri, Ati Vakri or Kutil Gati - Right Vedha. Left Vedha when "Ati Sheeghra" only. No Left Vedha in Sheeghra.
 	if speedCat == VAKRA || speedCat == ATI_VAKRA || speedCat == KUTIL {
-		return RIGHT_VEDHA, nil
+		return RIGHT_VEDHA
 	}
 
 	if speedCat == ATI_SHEEGHRA {
-		return LEFT_VEDHA, nil
+		return LEFT_VEDHA
 	}
 
-	return FRONT_VEDHA, nil
+	return FRONT_VEDHA
 }
 
 // PlanetSpeedCategory classifies a planet's longitudinal speed into the traditional

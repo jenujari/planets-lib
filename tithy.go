@@ -28,6 +28,12 @@ const (
 // NormalizeAngle returns an angle normalized into the range [0, 360).
 // If the input is NaN or infinite, it returns NaN.
 func NormalizeAngle(angle float64) float64 {
+	// Fast path: already in range, so skip the math.Mod call. NaN fails both
+	// comparisons and +/-Inf fail one each, so invalid inputs fall through below.
+	if angle >= 0 && angle < 360.0 {
+		return angle
+	}
+
 	if math.IsNaN(angle) || math.IsInf(angle, 0) {
 		return math.NaN()
 	}
