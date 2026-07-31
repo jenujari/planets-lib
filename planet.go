@@ -42,6 +42,15 @@ const (
 )
 
 var PLANET_NAMES = []string{SUN, MOON, MERCURY, VENUS, MARS, JUPITER, SATURN, URANUS, NEPTUNE, PLUTO, RAHU, KETU}
+
+// PLANET_LIB_MAP maps planet names to Swiss Ephemeris body numbers (SE_SUN = 0
+// through SE_PLUTO = 9, SE_MEAN_NODE = 10).
+//
+// RAHU and KETU deliberately share the value 10. Swiss Ephemeris defines no separate
+// Ketu body: the lunar nodes are always opposite, so callers query the mean node (10)
+// for Rahu and derive Ketu from the same result by adding 180 degrees. This is not a
+// duplicate-key mistake — do not "fix" KETU to 11, which is SE_TRUE_NODE, a different
+// node model (true rather than mean) and not Ketu.
 var PLANET_LIB_MAP = map[string]int{
 	SUN:     0,
 	MOON:    1,

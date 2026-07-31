@@ -1,6 +1,7 @@
 package baselib
 
 import (
+	"math"
 	"testing"
 )
 
@@ -26,5 +27,47 @@ func TestCalcNavanshRashi(t *testing.T) {
 				t.Errorf("CalcNavanshRashi(%v) = %v, want %v", tt.pl_long, got, tt.expected)
 			}
 		})
+	}
+}
+
+// Invalid floats previously reached int(NaN / 30.0), whose result is undefined by the
+// Go spec and indexed SIGNS out of range on amd64, panicking. They must now return the
+// zero-value signal instead.
+func TestCalcNavanshRashi_InvalidInputs(t *testing.T) {
+	tests := []struct {
+		name    string
+		pl_long float64
+	}{
+		{"NaN", math.NaN()},
+		{"positive infinity", math.Inf(1)},
+		{"negative infinity", math.Inf(-1)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Fatalf("CalcNavanshRashi(%v) panicked: %v", tt.pl_long, r)
+				}
+			}()
+
+			num, name := CalcNavanshRashi(tt.pl_long)
+			if num != 0 || name != "" {
+				t.Errorf("CalcNavanshRashi(%v) = (%v, %q), want (0, \"\")", tt.pl_long, num, name)
+			}
+		})
+	}
+}
+
+// Valid longitudes must always land inside SIGNS, including angles needing normalization.
+func TestCalcNavanshRashi_ResultAlwaysInRange(t *testing.T) {
+	for d := -720.0; d <= 1080.0; d += 0.37 {
+		num, name := CalcNavanshRashi(d)
+		if num < 1 || num > 12 {
+			t.Fatalf("CalcNavanshRashi(%v) = %v, out of 1..12", d, num)
+		}
+		if name != SIGNS[num-1] {
+			t.Fatalf("CalcNavanshRashi(%v) name %q does not match SIGNS[%d]", d, name, num-1)
+		}
 	}
 }

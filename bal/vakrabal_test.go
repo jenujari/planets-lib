@@ -1,6 +1,7 @@
 package bal
 
 import (
+	"math"
 	"testing"
 
 	baselib "github.com/jenujari/planets-lib"
@@ -43,4 +44,37 @@ func BenchmarkVakraBal(b *testing.B) {
 		r = VakraBal(-0.4, baselib.MARS)
 	}
 	test_bal = r
+}
+
+// Invalid speeds previously slipped past the pl_speed >= 0 check: -Inf produced a
+// full-strength 100 and NaN propagated into the result.
+func TestVakraBal_InvalidSpeeds(t *testing.T) {
+	invalid := []struct {
+		name  string
+		speed float64
+	}{
+		{"NaN", math.NaN()},
+		{"positive infinity", math.Inf(1)},
+		{"negative infinity", math.Inf(-1)},
+	}
+
+	for _, tt := range invalid {
+		t.Run(tt.name+" on a computed planet returns 0", func(t *testing.T) {
+			for _, planet := range []string{baselib.MARS, baselib.MERCURY, baselib.JUPITER, baselib.VENUS, baselib.SATURN} {
+				assert.Equal(t, 0.0, VakraBal(tt.speed, planet), "planet %s", planet)
+			}
+		})
+
+		// Rahu and Ketu are always retrograde by definition and never read the speed,
+		// so they must keep returning full strength even for an unusable speed value.
+		t.Run(tt.name+" keeps Rahu/Ketu definitional", func(t *testing.T) {
+			assert.Equal(t, 100.0, VakraBal(tt.speed, baselib.RAHU))
+			assert.Equal(t, 100.0, VakraBal(tt.speed, baselib.KETU))
+		})
+
+		t.Run(tt.name+" keeps Sun/Moon at 0", func(t *testing.T) {
+			assert.Equal(t, 0.0, VakraBal(tt.speed, baselib.SUN))
+			assert.Equal(t, 0.0, VakraBal(tt.speed, baselib.MOON))
+		})
+	}
 }
