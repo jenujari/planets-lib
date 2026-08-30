@@ -1,7 +1,6 @@
 package baselib
 
 import (
-	"math"
 	"sort"
 	"strings"
 )
@@ -181,12 +180,10 @@ var nakshatraStarts = []float64{
 func GetNakshatraPadaFromDegree(d float64) NakshatraPada {
 	var nakshatra NakshatraPada
 
-	// Guard against invalid inputs
-	if math.IsNaN(d) || math.IsInf(d, 0) {
+	nd, ok := ValidAngle(d)
+	if !ok {
 		return nakshatra
 	}
-
-	nd := NormalizeAngle(d)
 
 	// SearchFloat64s returns the first index whose boundary is >= nd. Step back one
 	// unless nd landed exactly on a boundary, which is the start of its own pada.

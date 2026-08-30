@@ -1,21 +1,16 @@
 package baselib
 
-import "math"
-
 // CalcNavanshRashi calculates the Navansh Rashi for a given longitude.
 // It returns the 1-indexed rashi number (1..12) and its name.
 //
 // Invalid inputs (NaN or +/-Inf) return (0, ""), matching how GetSignFrmDegree and
-// GetNakshatraPadaFromDegree signal an unknown result. Without this guard the
-// int(lon / 30.0) conversion below is undefined for NaN and yields a large negative
-// value on amd64, which then indexes SIGNS out of range and panics.
+// GetNakshatraPadaFromDegree signal an unknown result. ValidAngle owns that guard
+// so this function cannot index SIGNS out of range.
 func CalcNavanshRashi(pl_long float64) (int, string) {
-	if math.IsNaN(pl_long) || math.IsInf(pl_long, 0) {
+	lon, ok := ValidAngle(pl_long)
+	if !ok {
 		return 0, ""
 	}
-
-	// Normalize longitude to [0, 360)
-	lon := NormalizeAngle(pl_long)
 
 	// Determine the base sign (0..11)
 	rashiIdx := int(lon / 30.0)

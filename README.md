@@ -12,11 +12,11 @@ A small, focused Go library for basic astronomical/astrological utilities:
 - Lightweight planet coordinate container with derived computations
 - DMS (degrees/minutes/seconds) formatting helpers
 
-This repository is organized logically — core production code lives at the module root (e.g. `tithy.go`, `sign.go`, `nakshatra.go`, `planet.go`, `util.go`), while strength calculations reside in the `bal/` package. Tests are colocated with the code in `*_test.go` files.
+This repository is organized by concept — core mapping and planet-state code lives at the module root (`angle.go`, `planet.go`, `maitri.go`, `speed.go`, `vedha.go`, and the sign/nakshatra/tithy files), while strength calculations reside in the `bal/` package. Tests are colocated with the code in `*_test.go` files. Domain vocabulary is in `CONTEXT.md`.
 
 ## Highlights / Design decisions
 
-- Angle normalization is centralized via `NormalizeAngle` to consistently map arbitrary angles into `[0, 360)`.
+- Angle validity and wrap are centralized via `ValidAngle` (and `NormalizeAngle`) so mapping and strength functions share one longitude seam.
 - Functions are defensive about invalid floats: NaN and ±Inf inputs are handled predictably instead of panicking.
   - `CalcTithy` returns `0` for invalid inputs.
   - `GetSignFrmDegree` returns an empty string for invalid inputs.
@@ -87,14 +87,18 @@ This ensures pull requests (and pushes) run the test suite; merges to `main` can
 
 ## Files of interest
 
-- `tithy.go` — tithy calculation and `NormalizeAngle`.
+- `angle.go` — `ValidAngle` / `NormalizeAngle` longitude seam.
+- `tithy.go` — tithy calculation.
 - `sign.go` — sign names, lords, and `GetSignFrmDegree`.
 - `nakshatra.go` — nakshatra/pada mapping and vowel-based mapping helper.
-- `planet.go` — speed classification, Vedha logic, planetary relationship calculation (Graha Maitri Chakra), `PlanetCord` struct and `CalculateDerivedValues`.
+- `planet.go` — planet identity and `PlanetCord.CalculateDerivedValues`.
+- `maitri.go` — Graha Maitri (permanent planetary relationships).
+- `speed.go` — longitudinal speed categories.
+- `vedha.go` — Vedha direction from speed, plus nakshatra Vedha targets.
 - `navanshRashi.go` — Navamsha block tracking.
 - `util.go` — `DMS` utilities and formatting/parsing helpers.
-- `bal/` — package encapsulating various planetary strength calculations (`UchhBal`, `UdayBal`, `VakraBal`, `KshetraBal`, `NavanshBal`).
-- Tests: e.g., `tithy_test.go`, `bal/navanshbal_test.go`.
+- `bal/` — planetary strength calculations (`UchhBal`, `UdayBal`, `VakraBal`, `KshetraBal`, `NavanshBal`) sharing one relationship-weighted positional helper.
+- Tests: e.g., `angle_test.go`, `tithy_test.go`, `bal/navanshbal_test.go`.
 
 ## Development environment
 
