@@ -1,5 +1,12 @@
 package baselib
 
+const (
+	LEFT_VEDHA  = "left"
+	RIGHT_VEDHA = "right"
+	FRONT_VEDHA = "front"
+	NO_VEDHA    = "no"
+)
+
 var (
 	LeftVedhaMap = map[string]string{
 		NAKSHATRA_ASHWINI:           NAKSHATRA_ROHINI,
@@ -116,4 +123,69 @@ func VedhaTarget(f, d string) string {
 	}
 
 	return ""
+}
+
+// PlanetSBCLRFVedha determines the Vedha (obstruction) type for a planet based on
+// its longitudinal speed using traditional SBCLRF rules. It maps the speed to a
+// speed category via PlanetSpeedCategory and then translates that category into
+// one of the vedha constants (LEFT_VEDHA, RIGHT_VEDHA, FRONT_VEDHA, NO_VEDHA).
+// Special rules:
+//   - Rahu/Ketu always return LEFT_VEDHA.
+//   - Sun and Moon have bespoke mappings for left/front/no vedha based on their
+//     speed categories.
+//   - For other planets Vakra/Ati-Vakra/Kutil map to RIGHT_VEDHA, and
+//     Ati-Sheeghra maps to LEFT_VEDHA.
+//
+// Parameters:
+//   - planet: Name of the planet (use provided constants like SUN, MOON, etc.).
+//   - speed: Longitudinal speed (degrees per day).
+//
+// Returns:
+//   - vedha string (one of the vedha constants or, in fallback, the speed category),
+//     and an error if classification fails (e.g. invalid speed).
+func PlanetSBCLRFVedha(planet string, speed float64) (string, error) {
+	speedCat, err := PlanetSpeedCategory(planet, speed)
+	if err != nil {
+		return "", err
+	}
+
+	return vedhaFromSpeedCategory(planet, speedCat), nil
+}
+
+// vedhaFromSpeedCategory applies the SBCLRF vedha rules to an already-classified
+// speed category. Callers that have run PlanetSpeedCategory use this directly to
+// avoid classifying the same speed twice.
+func vedhaFromSpeedCategory(planet, speedCat string) string {
+	if planet == RAHU || planet == KETU {
+		return LEFT_VEDHA
+	}
+
+	if planet == SUN {
+		switch speedCat {
+		case SAMA, SHEEGHRA, ATI_SHEEGHRA:
+			return LEFT_VEDHA
+		case MAND, MADHYAM:
+			return FRONT_VEDHA
+		default:
+			return NO_VEDHA
+		}
+	}
+
+	if planet == MOON {
+		if speedCat == SAMA || speedCat == SHEEGHRA || speedCat == ATI_SHEEGHRA {
+			return LEFT_VEDHA
+		}
+		return FRONT_VEDHA
+	}
+
+	// When Vakri, Ati Vakri or Kutil Gati - Right Vedha. Left Vedha when "Ati Sheeghra" only. No Left Vedha in Sheeghra.
+	if speedCat == VAKRA || speedCat == ATI_VAKRA || speedCat == KUTIL {
+		return RIGHT_VEDHA
+	}
+
+	if speedCat == ATI_SHEEGHRA {
+		return LEFT_VEDHA
+	}
+
+	return FRONT_VEDHA
 }

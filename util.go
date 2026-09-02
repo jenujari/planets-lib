@@ -20,7 +20,7 @@ func NewDMS(degree float64) DMS {
 
 func (d *DMS) ParseFromDegree(degree float64) {
 	// Handle NaN and infinities defensively
-	if math.IsNaN(degree) || math.IsInf(degree, 0) {
+	if isInvalidFloat(degree) {
 		d.IsNegative = false
 		d.D = 0
 		d.M = 0

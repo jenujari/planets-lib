@@ -33,11 +33,9 @@ func UdayBal(sun_long, pl_long float64, isRetro bool, pl_name string) float64 {
 		return MinReturnValue
 	}
 
-	// Guard invalid longitudes before the distance arithmetic below, which would
-	// otherwise yield NaN. Checked after the two cases above, which are decided by
-	// the planet alone and never read the longitudes.
-	if math.IsNaN(sun_long) || math.IsInf(sun_long, 0) ||
-		math.IsNaN(pl_long) || math.IsInf(pl_long, 0) {
+	sLong, okSun := baselib.ValidAngle(sun_long)
+	pLong, okPl := baselib.ValidAngle(pl_long)
+	if !okSun || !okPl {
 		return MinReturnValue
 	}
 
@@ -69,12 +67,7 @@ func UdayBal(sun_long, pl_long float64, isRetro bool, pl_name string) float64 {
 		pl_ast = 15
 	}
 
-	// Planet distance from Sun
-	// pl_dist = planet_long - sun_long // take mod if negative or always use mod
-	// We use the shortest angular distance in [0, 180].
-	sLong := baselib.NormalizeAngle(sun_long)
-	pLong := baselib.NormalizeAngle(pl_long)
-
+	// Planet distance from Sun. Shortest angular distance in [0, 180].
 	pl_dist := math.Abs(pLong - sLong)
 	if pl_dist > 180 {
 		pl_dist = 360 - pl_dist

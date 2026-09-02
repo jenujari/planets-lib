@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a small Go library module (`github.com/jenujari/planets-lib`) with a flat layout. Production code lives at the repository root in files such as `planet.go`, `nakshatra.go`, `sign.go`, `tithy.go`, and `util.go`. Tests sit beside the code they cover in `*_test.go` files such as `tithy_test.go` and `util_test.go`. There are no separate `cmd/`, `internal/`, or asset directories yet, so keep new packages intentional and only introduce subdirectories when the API surface grows.
+This repository is a small Go library module (`github.com/jenujari/planets-lib`). Core mapping and planet-state code lives at the repository root, one concept per file (`angle.go`, `planet.go`, `maitri.go`, `speed.go`, `vedha.go`, `nakshatra.go`, `sign.go`, `tithy.go`, `navanshRashi.go`, `util.go`). Planetary strength calculations live in the `bal/` package. Tests sit beside the code they cover in `*_test.go` files. Domain terms are recorded in `CONTEXT.md`. Keep new packages intentional: do not add `cmd/` or `internal/` unless the public interface actually grows.
 
 ## Build, Test, and Development Commands
 Use the standard Go toolchain:

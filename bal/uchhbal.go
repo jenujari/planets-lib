@@ -25,7 +25,7 @@ var exaltationMapping = map[string]float64{
 func UchhBal(pl_long float64, pl_name string) float64 {
 	// Invalid longitudes would otherwise flow through math.Cos and return NaN,
 	// poisoning any downstream aggregate. Return 0, as for an unknown planet.
-	if math.IsNaN(pl_long) || math.IsInf(pl_long, 0) {
+	if _, ok := baselib.ValidAngle(pl_long); !ok {
 		return 0
 	}
 

@@ -1,7 +1,5 @@
 package baselib
 
-import "math"
-
 const (
 	SIGN_ARIES       = "Aries"
 	SIGN_TAURUS      = "Taurus"
@@ -48,14 +46,10 @@ var SIGN_COUNT = map[string]int{
 }
 
 func GetSignFrmDegree(d float64) string {
-	// Guard against invalid floating-point inputs.
-	if math.IsNaN(d) || math.IsInf(d, 0) {
+	nd, ok := ValidAngle(d)
+	if !ok {
 		return ""
 	}
-
-	// Normalize to [0,360) using shared helper. This handles negative angles
-	// and large values consistently with other functions in the package.
-	nd := NormalizeAngle(d)
 
 	// Each zodiac sign spans 30 degrees.
 	signIndex := int(nd / 30.0)
