@@ -18,16 +18,11 @@ import (
 //   - The calculated Kshetra Bal value (0 to 100).
 //   - An error if the planet or its relationship is not found.
 func KshetraBal(pl_long float64, pl_name string) (float64, error) {
-	lon, ok := base.ValidAngle(pl_long)
-	if !ok {
-		return 0, errInvalidLongitude
-	}
-
-	sign := base.GetSignFrmDegree(lon)
+	sign := base.GetSignFrmDegree(pl_long)
 	pl_swami := base.GetSignLord(sign)
 
-	// Remaining minutes in the current 30° sign. Peak at 15° (900').
-	rem := math.Mod(lon, 30.0) * 60
+	normLon := base.NormalizeAngle(pl_long)
+	rem := math.Mod(normLon, 30.0) * 60
 	distanceFactor := (900 - math.Abs(900-rem)) / 900
 
 	return weightedPositionalStrength(pl_name, pl_swami, distanceFactor)

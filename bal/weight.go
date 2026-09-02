@@ -1,12 +1,8 @@
 package bal
 
 import (
-	"errors"
-
 	base "github.com/jenujari/planets-lib"
 )
-
-var errInvalidLongitude = errors.New("invalid longitude")
 
 const (
 	WeightSelf    = 1.00

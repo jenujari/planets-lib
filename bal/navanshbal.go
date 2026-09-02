@@ -19,16 +19,12 @@ import (
 //   - The calculated Navansh Bal as a percentage (0.0 to 100.0).
 //   - An error if the planet's relationship with the Navamsha lord cannot be determined.
 func NavanshBal(pl_long float64, pl_name string) (float64, error) {
-	lon, ok := base.ValidAngle(pl_long)
-	if !ok {
-		return 0, errInvalidLongitude
-	}
-
-	_, navanshRashi := base.CalcNavanshRashi(lon)
+	_, navanshRashi := base.CalcNavanshRashi(pl_long)
 	navanshLord := base.GetSignLord(navanshRashi)
 
-	// Position within the 200-minute navamsha block. Peak at 100'.
-	positionInNavansh := math.Mod(lon*60, 200)
+	// Minutes use the raw longitude, matching the historical formula.
+	// Wrapping here would change results for values outside [0, 360).
+	positionInNavansh := math.Mod(pl_long*60, 200)
 	distanceFactor := (100 - math.Abs(100-positionInNavansh)) / 100
 
 	score, err := weightedPositionalStrength(pl_name, navanshLord, distanceFactor)

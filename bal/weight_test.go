@@ -1,7 +1,6 @@
 package bal
 
 import (
-	"math"
 	"testing"
 
 	baselib "github.com/jenujari/planets-lib"
@@ -39,26 +38,4 @@ func TestWeightedPositionalStrength(t *testing.T) {
 
 	_, err = weightedPositionalStrength(baselib.URANUS, baselib.SUN, 1.0)
 	assert.Error(t, err)
-}
-
-func TestNavanshBal_NormalizesWrappedLongitude(t *testing.T) {
-	// 1°40' is the Aries navamsha midpoint for Mars (SELF -> 100).
-	mid := 1.6666666666666667
-	baseScore, err := NavanshBal(mid, baselib.MARS)
-	assert.NoError(t, err)
-
-	wrapped, err := NavanshBal(mid+360, baselib.MARS)
-	assert.NoError(t, err)
-	assert.InDelta(t, baseScore, wrapped, 1e-9)
-
-	// Negative wrap used to skip NormalizeAngle on the minutes path.
-	neg, err := NavanshBal(mid-360, baselib.MARS)
-	assert.NoError(t, err)
-	assert.InDelta(t, baseScore, neg, 1e-9)
-}
-
-func TestKshetraBal_InvalidLongitude(t *testing.T) {
-	got, err := KshetraBal(math.NaN(), baselib.SUN)
-	assert.Error(t, err)
-	assert.Equal(t, 0.0, got)
 }

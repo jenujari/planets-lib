@@ -23,17 +23,19 @@ var exaltationMapping = map[string]float64{
 // pl_long: longitude of the planet in degrees.
 // pl_name: name of the planet (use constants like baselib.SUN, baselib.MOON, etc.).
 func UchhBal(pl_long float64, pl_name string) float64 {
+	// Invalid longitudes would otherwise flow through math.Cos and return NaN,
+	// poisoning any downstream aggregate. Return 0, as for an unknown planet.
+	if _, ok := baselib.ValidAngle(pl_long); !ok {
+		return 0
+	}
+
 	exalt_deg_max, ok := exaltationMapping[pl_name]
 	if !ok {
 		return 0
 	}
 
-	// Invalid longitudes would otherwise flow through math.Cos and return NaN,
-	// poisoning any downstream aggregate. Return 0, as for an unknown planet.
-	planetDeg, ok := baselib.ValidAngle(math.Abs(exalt_deg_max - pl_long))
-	if !ok {
-		return 0
-	}
+	planetDeg := math.Abs(exalt_deg_max - pl_long)
+	planetDeg = baselib.NormalizeAngle(planetDeg)
 
 	// Convert degrees to radians for math.Cos
 	rad := planetDeg * math.Pi / 180
