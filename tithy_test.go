@@ -3,9 +3,50 @@ package baselib
 import (
 	"math"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestTithyInstant(t *testing.T) {
+	utc := time.UTC
+	est := time.FixedZone("EST", -5*60*60)
+
+	tests := []struct {
+		name string
+		date time.Time
+		want time.Time
+	}{
+		{
+			name: "UTC date keeps that civil day at 06:30 IST",
+			date: time.Date(2026, 10, 3, 15, 45, 0, 0, utc),
+			want: time.Date(2026, 10, 3, 1, 0, 0, 0, utc),
+		},
+		{
+			name: "late UTC clock does not roll the requested date",
+			date: time.Date(2026, 10, 3, 22, 0, 0, 0, utc),
+			want: time.Date(2026, 10, 3, 1, 0, 0, 0, utc),
+		},
+		{
+			name: "non-UTC zone still uses the date's own year month day",
+			date: time.Date(2026, 10, 3, 23, 0, 0, 0, est),
+			want: time.Date(2026, 10, 3, 1, 0, 0, 0, utc),
+		},
+		{
+			name: "IST input with a different clock snaps to 06:30 IST",
+			date: time.Date(2024, 1, 1, 18, 0, 0, 0, ist),
+			want: time.Date(2024, 1, 1, 1, 0, 0, 0, utc),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := TithyInstant(tt.date)
+			assert.True(t, got.Equal(tt.want), "got %s want %s", got, tt.want)
+			assert.Equal(t, "UTC", got.Location().String())
+		})
+	}
+}
 
 func TestCalcTithy_BasicsAndBoundaries(t *testing.T) {
 	tests := []struct {

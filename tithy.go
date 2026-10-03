@@ -1,11 +1,17 @@
 package baselib
 
-import "math"
+import (
+	"math"
+	"time"
+)
 
 const (
 	degreesPerTithy = 12.0
 	maxTithy        = 30
 )
+
+// ist is Indian Standard Time, UTC+5:30, with no daylight saving.
+var ist = time.FixedZone("IST", 5*60*60+30*60)
 
 const (
 	SUNDAY    = "Sun"
@@ -24,6 +30,13 @@ const (
 	RIKTA  = "Rikta"
 	POORNA = "Poorna"
 )
+
+// TithyInstant is 06:30 IST on the calendar date of date, returned in UTC.
+// The clock on date is ignored. 06:30 IST is 01:00 UTC on that same civil day.
+func TithyInstant(date time.Time) time.Time {
+	y, m, d := date.Date()
+	return time.Date(y, m, d, 6, 30, 0, 0, ist).UTC()
+}
 
 // CalcTithy calculates the tithy (1..30) given the longitudes of the moon and the sun.
 // - 1..15 : Sukla Paksha (waxing)
